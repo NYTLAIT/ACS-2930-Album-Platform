@@ -130,9 +130,22 @@ nav a:hover {
 }
 
 .flash-success {
-  background: rgba(22, 163, 74, 0.9);
+  background:  rgba(220, 38, 38, 0.95);
 }
 
 .flash-error {
-  background: rgba(220, 38, 38, 0.95);
+  background: grey;
+}
+
+/* Form field errors */
+.form-errors {
+  list-style: none;
+  padding: 0;
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #fee2e2;
+}
+
+.form-errors li {
+  padding: 0.2rem 0;
 }

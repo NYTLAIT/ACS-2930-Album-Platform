@@ -38,7 +38,7 @@ nav {
 .hero {
   text-align: center;
   padding: 100px 20px;
-  background: linear-gradient(135deg, #1db954, #121212);
+  background: linear-gradient(135deg, #b91c1c, #121212);
 }
 
 .hero h1 {
@@ -54,7 +54,7 @@ nav {
 button {
   padding: 12px 25px;
   border: none;
-  background: #1db954;
+  background: #b91c1c;
   color: white;
   font-weight: bold;
   cursor: pointer;
@@ -63,7 +63,7 @@ button {
 }
 
 button:hover {
-  background: #17a74a;
+  background: #ef4444;
 }
 
 .section {
@@ -105,7 +105,7 @@ ul li {
 
 .cta {
   padding: 100px 20px;
-  background: #1db954;
+  background: #b91c1c;
   color: #000;
   text-align: center;
 }

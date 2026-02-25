@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results | AlbumRank</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">AlbumRank</div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('dashboard') }}">My Collections</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <section class="search-header">
+        <h1>Search Results</h1>
+        <p>Results for: <strong>"{{ query }}"</strong></p>
+        <a href="{{ url_for('home') }}" class="back-link">← Back to Home</a>
+    </section>
+
+    <!-- Search Form -->
+    <section class="search-section">
+        <div class="search-container">
+            <form method="GET" action="{{ url_for('search') }}" class="search-form">
+                <input 
+                    type="text" 
+                    name="query" 
+                    class="search-input" 
+                    placeholder="Search by album name, artist, or genre..."
+                    value="{{ query }}"
+                    required
+                >
+                <button type="submit" class="search-btn">Search</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Results Section -->
+    <section class="results-section">
+        {% if albums %}
+            <div class="albums-grid">
+                {% for album in albums %}
+                    <div class="album-card">
+                        {% if album.album_art %}
+                            <img src="{{ album.album_art }}" alt="{{ album.name }}" class="album-image">
+                        {% else %}
+                            <div class="album-placeholder">No Image</div>
+                        {% endif %}
+                        <div class="album-info">
+                            <h3>{{ album.name }}</h3>
+                            <p class="artist">{{ album.artist }}</p>
+                            {% if album.release_date %}
+                                <p class="release-year">{{ album.release_date }}</p>
+                            {% endif %}
+                            <a href="#" class="add-btn">+ Add to Collection</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-results">
+                <h2>No albums found</h2>
+                <p>Try searching with different keywords...</p>
+                <a href="{{ url_for('home') }}" class="btn-home">Return Home</a>
+            </div>
+        {% endif %}
+    </section>
+
+</body>
+
+</html>
