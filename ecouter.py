@@ -92,15 +92,23 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
             return redirect(url_for('home'))
         
         form = LoginForm()
+
+        print("FORM VALID:", form.validate_on_submit())
+        print("FORM ERRORS:", form.errors)
+
         if form.validate_on_submit():
             user = User.query.filter_by(email=form.email.data).first()
+            print("FOUND USER:", user)
+
+            if user:
+                print("PASSWORD CHECK:", user.check_password(form.password.data))
+
             if user and user.check_password(form.password.data):
                 login_user(user)
                 flash('Logged in successfully!', 'success')
                 return redirect(url_for('home'))
             else:
                 flash('Invalid email or password.', 'danger')
-                return redirect(url_for('login'))
         
         return render_template('login.html', form=form)
     
