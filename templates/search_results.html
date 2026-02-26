@@ -46,41 +46,43 @@
 
     <!-- Results Section -->
     <section class="results-section">
-        {% if albums %}
-            <div class="albums-grid">
-                {% for album in albums %}
-                    <div class="album-card">
-                        {% if album.album_art %}
-                            <img src="{{ album.album_art }}" alt="{{ album.name }}" class="album-image">
-                        {% else %}
-                            <div class="album-placeholder">No Image</div>
-                        {% endif %}
-                        <div class="album-info">
-                            <h3>{{ album.name }}</h3>
-                            <p class="artist">{{ album.artist }}</p>
-                            {% if album.release_date %}
-                                <p class="release-year">{{ album.release_date }}</p>
-                            {% endif %}
-                            <form method="POST" action="">
-                                <input type="hidden" name="spotify_id" value="{{ album.spotify_id }}">
-                                <input type="hidden" name="name" value="{{ album.name }}">
-                                <input type="hidden" name="artist" value="{{ album.artist }}">
-                                <input type="hidden" name="release_date" value="{{ album.release_date }}">
-                                <input type="hidden" name="album_art" value="{{ album.album_art }}">
-                                <button type="submit" class="add-btn">+ Add to Collection</button>
-                            </form>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="no-results">
-                <h2>No albums found</h2>
-                <p>Try searching with different keywords...</p>
-                <a href="{{ url_for('home') }}" class="btn-home">Return Home</a>
-            </div>
-        {% endif %}
-    </section>
+    <h2>Search Results for "{{ query }}"</h2>
 
+    {% if albums %}
+    <div class="albums-grid">
+        {% for album in albums %}
+        <div class="album-card">
+            {% if album.album_art %}
+            <img src="{{ album.album_art }}" alt="{{ album.name }}" class="album-image">
+            {% else %}
+            <div class="album-placeholder">No Image</div>
+            {% endif %}
+            <div class="album-info">
+                <h3>{{ album.name }}</h3>
+                <p class="artist">{{ album.artist }}</p>
+                <p class="release-year">{{ album.release_date }}</p>
+
+                <!-- Add to Collection Form -->
+                <form method="POST" action="{{ url_for('add_to_collection', album_id=album.spotify_id) }}">
+                    <button type="submit" class="add-btn">+ Add to Collection</button>
+                </form>
+
+                <!-- Optional: Ratings (if already in collection) -->
+                {% if album.user_rating %}
+                <form method="POST" action="{{ url_for('rate_album', album_id=album.spotify_id) }}">
+                    <label for="rating">Rate (0.5–5.0):</label>
+                    <input type="number" name="rating" step="0.5" min="0.5" max="5" value="{{ album.user_rating }}">
+                    <button type="submit" class="add-btn">Submit Rating</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="no-results">No albums found.</p>
+    {% endif %}
+</section>
 </body>
 
 </html>

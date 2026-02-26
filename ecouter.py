@@ -5,12 +5,13 @@ import os
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from dotenv import load_dotenv
+from models import user_album
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 from config import DevelopmentConfig
-from models import db, init_db, User, Album, Playlist
+from models import db, init_db, User, Album, Playlist, user_album
 from forms import SignupForm, LoginForm
 
 # Load environment variables
@@ -157,42 +158,45 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
             return redirect(url_for('playlists'))
         return render_template('create_playlist.html')
     
-    @app.route('/rate_album/<int:album_id>', methods=['POST'])
+    # Add to Collection
+    @app.route('/add_to_collection/<album_id>', methods=['POST'])
+    @login_required
+    def add_to_collection(album_id):
+        album = Album.query.filter_by(spotify_id=album_id).first()
+        if not album:
+            flash("Album not found.", "danger")
+            return redirect(url_for('home'))
+
+        existing = UserAlbum.query.filter_by(user_id=current_user.id, album_id=album.id).first()
+        if existing:
+            flash(f"{album.name} is already in your collection.", "info")
+        else:
+            user_album = UserAlbum(user_id=current_user.id, album_id=album.id)
+            db.session.add(user_album)
+            db.session.commit()
+            flash(f"Added {album.name} to your collection!", "success")
+
+        return redirect(request.referrer or url_for('home'))
+
+
+    @app.route('/rate_album/<album_id>', methods=['POST'])
     @login_required
     def rate_album(album_id):
-        album = Album.query.get_or_404(album_id)
+        album = Album.query.filter_by(spotify_id=album_id).first_or_404()
         rating = request.form.get('rating', type=float)
-
         if not rating or rating < 0.5 or rating > 5:
             flash("Invalid rating value.", "danger")
-            return redirect(url_for('dashboard'))
+            return redirect(request.referrer or url_for('home'))
 
-        # Check if user already rated this album
-        existing = db.session.execute(
-            album_ratings.select().where(
-                (album_ratings.c.user_id == current_user.id) &
-                (album_ratings.c.album_id == album.id)
-            )
-        ).first()
-
+        existing = UserAlbum.query.filter_by(user_id=current_user.id, album_id=album.id).first()
         if existing:
-            # Update rating
-            db.session.execute(
-                album_ratings.update().where(
-                    (album_ratings.c.user_id == current_user.id) &
-                    (album_ratings.c.album_id == album.id)
-                ).values(rating=rating)
-            )
+            existing.rating = rating
+            db.session.commit()
             flash(f"Updated rating for {album.name} to {rating} stars.", "success")
         else:
-            # Insert new rating
-            db.session.execute(
-                album_ratings.insert().values(user_id=current_user.id, album_id=album.id, rating=rating)
-            )
-            flash(f"Rated {album.name} {rating} stars.", "success")
+            flash(f"Add {album.name} to your collection first.", "danger")
 
-        db.session.commit()
-        return redirect(url_for('dashboard'))
+        return redirect(request.referrer or url_for('home'))
 
     # /home route — acts as dashboard + home
     @app.route('/home')
