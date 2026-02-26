@@ -6,7 +6,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from dotenv import load_dotenv
 
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 from config import DevelopmentConfig
@@ -16,15 +16,20 @@ from forms import SignupForm, LoginForm
 # Load environment variables
 load_dotenv()
 
-def create_app(config_class=DevelopmentConfig):
+def create_app(config_class=DevelopmentConfig): # Check config classes in config.py
     """Create and configure the Flask application"""
+
+# =======================================================================================================================    
+# === Initializing ===                                                                                                  =
+# ======================================================================================================================= 
+    # Initialize app and connect to specified database
     app = Flask(__name__)
     app.config.from_object(config_class)
     
-    # Initialize extensions
-    db.init_app(app)
+    # Initialize the database via database.py
+    init_db(app)
     
-    # Initialize login manager
+    # Initialize login manager (CHRISTIAN'S DOMAIN)
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = 'login'
@@ -33,17 +38,15 @@ def create_app(config_class=DevelopmentConfig):
     def load_user(user_id):
         return User.query.get(int(user_id))
     
-    # Initialize Spotify API
+    # Initialize Spotify API (DO NOT TOUCH)
     client_id = os.getenv('CLIENT_ID')
     client_secret = os.getenv('CLIENT_SECRET')
     auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
     app.spotify = spotipy.Spotify(auth_manager=auth_manager)
-    
-    # Create database tables
-    with app.app_context():
-        db.create_all()
-    
-    # === Routes ===
+
+# =======================================================================================================================    
+# === Routes ===                                                                                                        =
+# ======================================================================================================================= 
     
     @app.route('/')
     def index():
@@ -60,29 +63,23 @@ def create_app(config_class=DevelopmentConfig):
         
         form = SignupForm()
         if form.validate_on_submit():
-            try:
-                # Check if user already exists
-                if User.query.filter_by(email=form.email.data).first():
-                    flash('Email already registered.', 'danger')
-                    return redirect(url_for('signup'))
-                
-                if User.query.filter_by(username=form.username.data).first():
-                    flash('Username already taken.', 'danger')
-                    return redirect(url_for('signup'))
-                
-                # Create new user
-                user = User(email=form.email.data, username=form.username.data)
-                user.set_password(form.password.data)
-                
-                db.session.add(user)
-                db.session.commit()
-                
-                flash('Account created successfully! You can now log in.', 'success')
-                return redirect(url_for('login'))
-            except Exception as e:
-                db.session.rollback()
-                flash(f'Error creating account: {str(e)}', 'danger')
+            # Check if user already exists
+            if User.query.filter_by(email=form.email.data).first():
+                flash('Email already registered.', 'danger')
                 return redirect(url_for('signup'))
+                
+            if User.query.filter_by(username=form.username.data).first():
+                flash('Username already taken.', 'danger')
+                return redirect(url_for('signup'))
+                
+            # Create new user
+            user = User(email=form.email.data, username=form.username.data)
+            user.set_password(form.password.data)
+            db.session.add(user)
+            db.session.commit()
+                
+            flash('Account created successfully! You can now log in.', 'success')
+            return redirect(url_for('login'))
         
         return render_template('signup.html', form=form)
     
@@ -93,44 +90,41 @@ def create_app(config_class=DevelopmentConfig):
             return redirect(url_for('home'))
         
         form = LoginForm()
-        # TODO: Uncomment form validation and database check when ready
-        # if form.validate_on_submit():
-        #     user = User.query.filter_by(email=form.email.data).first()
-        #     if user is None or not user.check_password(form.password.data):
-        #         flash('Invalid email or password.', 'danger')
-        #         return redirect(url_for('login'))
-        #     login_user(user)
-        
-        # For now, just skip validation and let user through
-        if request.method == 'POST':
-            flash('Logged in successfully!', 'success')
-            return redirect(url_for('home'))
+        if form.validate_on_submit():
+            user = User.query.filter_by(email=form.email.data).first()
+            if user and user.check_password(form.password.data):
+                login_user(user)
+                flash('Logged in successfully!', 'success')
+                return redirect(url_for('home'))
+            else:
+                flash('Invalid email or password.', 'danger')
+                return redirect(url_for('login'))
         
         return render_template('login.html', form=form)
     
     @app.route('/logout')
-    # @login_required  # TODO: Uncomment when database auth is ready
+    @login_required
     def logout():
         """Logout user"""
         logout_user()
-        flash('You have been logged out.', 'info')
+        flash('Logged out.', 'info')
         return redirect(url_for('login'))
     
     @app.route('/dashboard')
-    # @login_required  # TODO: Uncomment when database auth is ready
+    @login_required
     def dashboard():
         """User dashboard"""
         playlists = Playlist.query.filter_by(user_id=current_user.id).all()
         return render_template('dashboard.html', playlists=playlists)
     
     @app.route('/home')
-    # @login_required  # TODO: Uncomment when database auth is ready
+    @login_required
     def home():
         """Home page with search functionality"""
         return render_template('home.html')
     
     @app.route('/search')
-    # @login_required  # TODO: Uncomment when database auth is ready
+    @login_required
     def search():
         """Search for albums"""
         query = request.args.get('query', '').strip()
