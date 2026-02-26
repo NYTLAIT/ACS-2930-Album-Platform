@@ -15,6 +15,14 @@ class User(UserMixin, db.Model):
     # Relationships
     playlists = db.relationship('Playlist', backref='user', lazy=True, cascade='all, delete-orphan')
     
+    # New: user ratings relationship
+    rated_albums = db.relationship(
+        'Album',
+        secondary='album_ratings',
+        backref='user_ratings',
+        lazy='dynamic'
+    )
+
     def set_password(self, password):
         """Hash and set password"""
         self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')

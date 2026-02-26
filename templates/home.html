@@ -10,45 +10,73 @@
 
 <body>
 
-    <!-- Navigation -->
-    <nav>
-        <div class="logo">AlbumRank</div>
-        <div class="nav-links">
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('dashboard') }}">My Collections</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-            <a href="{{ url_for('playlists') }}">Playlists</a>
-        </div>
-    </nav>
+<!-- Navigation stays the same -->
+<nav>
+    <div class="logo">AlbumRank</div>
+    <div class="nav-links">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('dashboard') }}">My Collections</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('playlists') }}">Playlists</a>
+    </div>
+</nav>
 
-    <!-- Welcome Section -->
-    <section class="welcome-section">
-        <h1>Welcome back, {{ current_user.username }}!</h1>
-        <p>Discover and search for your favorite albums</p>
-    </section>
+<!-- Replace from here with new dashboard section -->
+<section class="welcome-section">
+    <h1>Welcome back, {{ current_user.username }}!</h1>
+    <p>Here’s your collection and playlists.</p>
+</section>
 
-    <!-- Search Section -->
-    <section class="search-section">
-        <div class="search-container">
-            <h2>Search Albums</h2>
-            <form method="GET" action="{{ url_for('search') }}" class="search-form">
-                <input 
-                    type="text" 
-                    name="query" 
-                    class="search-input" 
-                    placeholder="Search by album name, artist, or genre..."
-                    required
-                >
-                <button type="submit" class="search-btn">Search</button>
-            </form>
-        </div>
-    </section>
+<!-- Search Section -->
+<section class="search-section">
+    <div class="search-container">
+        <h2>Search Albums</h2>
+        <form method="GET" action="{{ url_for('search') }}" class="search-form">
+            <input 
+                type="text" 
+                name="query" 
+                class="search-input" 
+                placeholder="Search by album name, artist, or genre..."
+                required
+            >
+            <button type="submit" class="search-btn">Search</button>
+        </form>
+    </div>
+</section>
 
-    <!-- Featured Albums Section -->
-    <section class="featured-section">
-        <h2>Featured Albums to Explore</h2>
-        <p class="featured-subtitle">Use the search bar above to find albums and add them to your collection</p>
-    </section>
+<section class="featured-section">
+    <h2>My Collection</h2>
+    {% if current_user.playlists %}
+        {% for playlist in current_user.playlists %}
+            <h3>{{ playlist.name }}</h3>
+            <div class="albums-grid">
+                {% for album in playlist.albums %}
+                    <div class="album-card">
+                        {% if album.image_url %}
+                            <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-image">
+                        {% else %}
+                            <div class="album-placeholder">No Image</div>
+                        {% endif %}
+                        <div class="album-info">
+                            <h3>{{ album.name }}</h3>
+                            <p>{{ album.artist }}</p>
+
+                            <!-- Rating form -->
+                            <form method="POST" action="{{ url_for('rate_album', album_id=album.id) }}">
+                                <label for="rating">Rate (0.5–5.0):</label>
+                                <input type="number" name="rating" step="0.5" min="0.5" max="5"
+                                       value="{{ ratings.get(album.id) or '' }}">
+                                <button type="submit">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>You don’t have any albums yet. Go search and add some!</p>
+    {% endif %}
+</section>
 
 </body>
 

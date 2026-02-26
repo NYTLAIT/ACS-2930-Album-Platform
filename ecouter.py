@@ -126,9 +126,8 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
     @app.route('/dashboard')
     @login_required
     def dashboard():
-        """User dashboard"""
-        playlists = Playlist.query.filter_by(user_id=current_user.id).all()
-        return render_template('dashboard.html', playlists=playlists)
+       """Redirect dashboard to home"""
+       return redirect(url_for('home'))
     
     @app.route('/playlists')
     @login_required
@@ -137,11 +136,84 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
         user_playlists = Playlist.query.filter_by(user_id=current_user.id).all()
         return render_template('playlists.html', playlists=user_playlists)
     
+    @app.route('/playlist/<int:playlist_id>')
+    @login_required
+    def view_playlist(playlist_id):
+        playlist = Playlist.query.get_or_404(playlist_id)
+        if playlist.user_id != current_user.id:
+            flash("Access denied.", "danger")
+            return redirect(url_for('playlists'))
+        return render_template('view_playlist.html', playlist=playlist)
+    
+    @app.route('/create_playlist', methods=['GET', 'POST'])
+    @login_required
+    def create_playlist():
+        if request.method == 'POST':
+            name = request.form.get('name')
+            playlist = Playlist(name=name, user_id=current_user.id)
+            db.session.add(playlist)
+            db.session.commit()
+            flash('Playlist created!', 'success')
+            return redirect(url_for('playlists'))
+        return render_template('create_playlist.html')
+    
+    @app.route('/rate_album/<int:album_id>', methods=['POST'])
+    @login_required
+    def rate_album(album_id):
+        album = Album.query.get_or_404(album_id)
+        rating = request.form.get('rating', type=float)
+
+        if not rating or rating < 0.5 or rating > 5:
+            flash("Invalid rating value.", "danger")
+            return redirect(url_for('dashboard'))
+
+        # Check if user already rated this album
+        existing = db.session.execute(
+            album_ratings.select().where(
+                (album_ratings.c.user_id == current_user.id) &
+                (album_ratings.c.album_id == album.id)
+            )
+        ).first()
+
+        if existing:
+            # Update rating
+            db.session.execute(
+                album_ratings.update().where(
+                    (album_ratings.c.user_id == current_user.id) &
+                    (album_ratings.c.album_id == album.id)
+                ).values(rating=rating)
+            )
+            flash(f"Updated rating for {album.name} to {rating} stars.", "success")
+        else:
+            # Insert new rating
+            db.session.execute(
+                album_ratings.insert().values(user_id=current_user.id, album_id=album.id, rating=rating)
+            )
+            flash(f"Rated {album.name} {rating} stars.", "success")
+
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+
+    # /home route — acts as dashboard + home
     @app.route('/home')
     @login_required
     def home():
-        """Home page with search functionality"""
-        return render_template('home.html')
+        """Home page / user dashboard"""
+        # Get all playlists for current user
+        playlists = Playlist.query.filter_by(user_id=current_user.id).all()
+
+        # Precompute ratings for current user's albums
+        ratings = {}
+        for playlist in playlists:
+            for album in playlist.albums:
+                for r in album.user_ratings:  # r is a User
+                    if r.id == current_user.id:
+                        # Find rating in UserAlbum
+                        user_album = next((ua for ua in r.user_albums if ua.album_id == album.id), None)
+                        if user_album:
+                            ratings[album.id] = user_album.rating
+
+        return render_template('home.html', playlists=playlists, ratings=ratings)
     
     # -------------------------------------------------------------------------------------------------------------------
     # SEARCH ROUTE

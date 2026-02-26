@@ -8,6 +8,14 @@ playlist_albums = db.Table(
     db.Column('album_id', db.Integer, db.ForeignKey('albums.id'), primary_key=True)
 )
 
+# New table to store ratings for each album by user
+album_ratings = db.Table(
+    'album_ratings',
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('album_id', db.Integer, db.ForeignKey('albums.id'), primary_key=True),
+    db.Column('rating', db.Float)  # Rating 0.5–5.0
+)
+
 class Playlist(db.Model):
     __tablename__ = 'playlists'
     

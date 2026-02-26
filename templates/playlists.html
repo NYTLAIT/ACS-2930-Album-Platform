@@ -33,8 +33,7 @@
                         <p class="artist">
                             {{ playlist.albums|length }} Albums
                         </p>
-                        <a href="#" class="add-btn">View Playlist</a>
-                    </div>
+                        <a href="{{ url_for('view_playlist', playlist_id=playlist.id) }}" class="add-btn">View Playlist</a>                    </div>
                 </div>
             {% endfor %}
         </div>
@@ -42,8 +41,7 @@
         <div class="no-results">
             <h2>No Playlists Yet</h2>
             <p>Create your first playlist to start organizing albums.</p>
-            <a href="#" class="btn-home">Create Playlist</a>
-        </div>
+            <a href="{{ url_for('create_playlist') }}" class="btn-home">Create Playlist</a>        </div>
     {% endif %}
 </section>
 

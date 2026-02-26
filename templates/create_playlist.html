@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Create Playlist</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+<body>
+<nav>
+  <div class="logo">AlbumRank</div>
+</nav>
+<section class="search-header">
+  <h1>Create Playlist</h1>
+</section>
+<section class="results-section">
+  <form method="POST">
+    <input type="text" name="name" placeholder="Playlist Name" required>
+    <button type="submit">Create</button>
+  </form>
+</section>
+</body>
+</html>
