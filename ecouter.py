@@ -47,7 +47,9 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
 # =======================================================================================================================    
 # === Routes ===                                                                                                        =
 # ======================================================================================================================= 
-    
+
+    # -------------------------------------------------------------------------------------------------------------------
+    # SIGNUP, LOGIN, and LOGOUT
     @app.route('/')
     def index():
         """Landing page"""
@@ -110,6 +112,9 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
         flash('Logged out.', 'info')
         return redirect(url_for('login'))
     
+    # END SIGNUP, LOGIN, and LOGOUT
+    # -------------------------------------------------------------------------------------------------------------------
+    
     @app.route('/dashboard')
     @login_required
     def dashboard():
@@ -123,6 +128,8 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
         """Home page with search functionality"""
         return render_template('home.html')
     
+    # -------------------------------------------------------------------------------------------------------------------
+    # SEARCH ROUTE
     @app.route('/search')
     @login_required
     def search():
