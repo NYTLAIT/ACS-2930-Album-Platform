@@ -11,7 +11,6 @@ class Album(db.Model):
     release_date = db.Column(db.String(10))  # Format: YYYY-MM-DD
     image_url = db.Column(db.String(500))
     spotify_url = db.Column(db.String(500))
-    created_at = db.Column(db.DateTime, default=datetime.now)
     
     # Relationships
     playlists = db.relationship('Playlist', secondary='playlist_albums', backref='albums')

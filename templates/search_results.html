@@ -61,8 +61,14 @@
                             {% if album.release_date %}
                                 <p class="release-year">{{ album.release_date }}</p>
                             {% endif %}
-                            <a href="#" class="add-btn">+ Add to Collection</a>
-                        </div>
+                            <form method="POST" action="">
+                                <input type="hidden" name="spotify_id" value="{{ album.spotify_id }}">
+                                <input type="hidden" name="name" value="{{ album.name }}">
+                                <input type="hidden" name="artist" value="{{ album.artist }}">
+                                <input type="hidden" name="release_date" value="{{ album.release_date }}">
+                                <input type="hidden" name="album_art" value="{{ album.album_art }}">
+                                <button type="submit" class="add-btn">+ Add to Collection</button>
+                            </form>
                     </div>
                 {% endfor %}
             </div>
