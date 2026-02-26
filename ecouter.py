@@ -117,6 +117,13 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
         playlists = Playlist.query.filter_by(user_id=current_user.id).all()
         return render_template('dashboard.html', playlists=playlists)
     
+    @app.route('/playlists')
+    @login_required
+    def playlists():
+        """User playlists page"""
+        user_playlists = Playlist.query.filter_by(user_id=current_user.id).all()
+        return render_template('playlists.html', playlists=user_playlists)
+    
     @app.route('/home')
     @login_required
     def home():

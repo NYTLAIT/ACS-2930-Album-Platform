@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Playlists | AlbumRank</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+
+<body>
+
+<nav>
+    <div class="logo">AlbumRank</div>
+    <div class="nav-links">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('dashboard') }}">My Collections</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</nav>
+
+<section class="search-header">
+    <h1>My Playlists</h1>
+    <p>Organize your favorite albums into curated playlists</p>
+</section>
+
+<section class="results-section">
+    {% if playlists %}
+        <div class="albums-grid">
+            {% for playlist in playlists %}
+                <div class="album-card">
+                    <div class="album-info">
+                        <h3>{{ playlist.name }}</h3>
+                        <p class="artist">
+                            {{ playlist.albums|length }} Albums
+                        </p>
+                        <a href="#" class="add-btn">View Playlist</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-results">
+            <h2>No Playlists Yet</h2>
+            <p>Create your first playlist to start organizing albums.</p>
+            <a href="#" class="btn-home">Create Playlist</a>
+        </div>
+    {% endif %}
+</section>
+
+</body>
+</html>
