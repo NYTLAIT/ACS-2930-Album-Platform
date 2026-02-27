@@ -4,44 +4,48 @@
     <meta charset="UTF-8">
     <title>My Playlists | AlbumRank</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='playlists.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<nav>
-    <div class="logo">AlbumRank</div>
+<!-- Navigation -->
+<nav class="nav-bar">
+    <div class="logo">🎵 AlbumRank</div>
     <div class="nav-links">
         <a href="{{ url_for('home') }}">Home</a>
         <a href="{{ url_for('dashboard') }}">My Collections</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
     </div>
 </nav>
 
+<!-- Header -->
 <section class="search-header">
-    <h1>My Playlists</h1>
-    <p>Organize your favorite albums into curated playlists</p>
+    <h1>🎶 My Playlists</h1>
+    <p>Organize your favorite albums into curated playlists and vibe to your tunes.</p>
 </section>
 
+<!-- Playlist Grid -->
 <section class="results-section">
     {% if playlists %}
         <div class="albums-grid">
             {% for playlist in playlists %}
-                <div class="album-card">
-                    <div class="album-info">
-                        <h3>{{ playlist.name }}</h3>
-                        <p class="artist">
-                            {{ playlist.albums|length }} Albums
-                        </p>
-                        <a href="{{ url_for('view_playlist', playlist_id=playlist.id) }}" class="add-btn">View Playlist</a>                    </div>
+                <div class="playlist-card">
+                    <div class="playlist-info">
+                        <h3 class="playlist-name">🎧 {{ playlist.name }}</h3>
+                        <p class="album-count">{{ playlist.albums|length }} Albums</p>
+                        <a href="{{ url_for('view_playlist', playlist_id=playlist.id) }}" class="view-btn">View Playlist ➤</a>
+                    </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
         <div class="no-results">
-            <h2>No Playlists Yet</h2>
-            <p>Create your first playlist to start organizing albums.</p>
-            <a href="{{ url_for('create_playlist') }}" class="btn-home">Create Playlist</a>        </div>
+            <h2>😮 No Playlists Yet</h2>
+            <p>Create your first playlist to start organizing albums and discover vibes!</p>
+            <a href="{{ url_for('create_playlist') }}" class="btn-home">➕ Create Playlist</a>
+        </div>
     {% endif %}
 </section>
 

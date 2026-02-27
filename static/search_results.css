@@ -1,0 +1,199 @@
+/* Body & Fonts */
+body {
+    font-family: 'Roboto', sans-serif;
+    background: #121212;
+    color: #f0f0f0;
+    margin: 0;
+}
+
+/* Navigation */
+.nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: linear-gradient(90deg, #ff5f6d, #ffc371);
+    color: #fff;
+}
+
+.nav-links a {
+    margin-left: 1.5rem;
+    text-decoration: none;
+    color: #fff;
+    font-weight: 600;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.nav-links a:hover {
+    transform: scale(1.1);
+    color: #121212;
+}
+
+/* Header Section */
+.search-header {
+    text-align: center;
+    padding: 2rem;
+    background: #1e1e1e;
+    border-bottom: 2px solid #ff5f6d;
+}
+
+.search-header h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: #ff5f6d;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    background: #ff5f6d;
+    color: #fff;
+    border-radius: 15px;
+    text-decoration: none;
+    transition: 0.3s ease;
+}
+
+.back-link:hover {
+    background: #ffc371;
+    color: #121212;
+}
+
+/* Search Form */
+.search-section {
+    text-align: center;
+    padding: 2rem;
+}
+
+.search-input {
+    padding: 0.5rem 1rem;
+    width: 60%;
+    border-radius: 20px;
+    border: none;
+    margin-right: 0.5rem;
+    background: #2c2c2c;
+    color: #fff;
+}
+
+.search-input::placeholder {
+    color: #888;
+}
+
+.search-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: none;
+    background: #ff5f6d;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.search-btn:hover {
+    background: #ffc371;
+    color: #121212;
+}
+
+/* Albums Grid */
+.albums-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem;
+}
+
+.album-card {
+    background: #1f1f1f;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.album-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(255, 95, 109, 0.4);
+}
+
+.album-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.album-placeholder {
+    width: 100%;
+    height: 180px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #2c2c2c;
+    color: #999;
+}
+
+.album-info {
+    padding: 1rem;
+    text-align: center;
+}
+
+.album-name {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2rem;
+    color: #ff5f6d;
+    margin-bottom: 0.3rem;
+}
+
+.artist, .release-year {
+    color: #ccc;
+    margin: 0.2rem 0;
+}
+
+/* Add to Collection Button */
+.add-btn {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    border: none;
+    background: #ff5f6d;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.add-btn:hover {
+    background: #ffc371;
+    color: #121212;
+}
+
+/* Empty state */
+.no-results {
+    text-align: center;
+    padding: 3rem;
+}
+
+.no-results h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.no-results p {
+    margin-bottom: 1.5rem;
+    color: #ccc;
+}
+
+.btn-home {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    background: #ff5f6d;
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.3s ease;
+}
+
+.btn-home:hover {
+    background: #ffc371;
+    color: #121212;
+}

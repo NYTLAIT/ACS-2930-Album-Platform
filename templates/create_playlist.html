@@ -2,21 +2,34 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Create Playlist</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+<title>Create Playlist | AlbumRank</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{{ url_for('static', filename='create_playlist.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
 </head>
 <body>
-<nav>
-  <div class="logo">AlbumRank</div>
+
+<!-- Navigation -->
+<nav class="nav-bar">
+    <div class="logo">🎵 AlbumRank</div>
 </nav>
-<section class="search-header">
-  <h1>Create Playlist</h1>
+
+<!-- Header -->
+<section class="playlist-header">
+    <h1>➕ Create New Playlist</h1>
+    <p>Organize your favorite albums into your very own curated collection!</p>
+    <a href="{{ url_for('playlists') }}" class="back-link">← Back to Playlists</a>
 </section>
+
+<!-- Create Form -->
 <section class="results-section">
-  <form method="POST">
-    <input type="text" name="name" placeholder="Playlist Name" required>
-    <button type="submit">Create</button>
-  </form>
+    <div class="create-card">
+        <form method="POST" class="create-form">
+            <input type="text" name="name" placeholder="Playlist Name" required class="playlist-input">
+            <button type="submit" class="create-btn">🎶 Create Playlist</button>
+        </form>
+    </div>
 </section>
+
 </body>
 </html>

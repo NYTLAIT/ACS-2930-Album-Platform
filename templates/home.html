@@ -6,25 +6,28 @@
     <title>Home | AlbumRank</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<!-- Navigation stays the same -->
-<nav>
-    <div class="logo">AlbumRank</div>
+<!-- Navigation -->
+<nav class="nav-bar">
+    <div class="logo">🎵 AlbumRank</div>
     <div class="nav-links">
         <a href="{{ url_for('home') }}">Home</a>
         <a href="{{ url_for('dashboard') }}">My Collections</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
         <a href="{{ url_for('playlists') }}">Playlists</a>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
     </div>
 </nav>
 
-<!-- Replace from here with new dashboard section -->
+<!-- Welcome Section -->
 <section class="welcome-section">
-    <h1>Welcome back, {{ current_user.username }}!</h1>
-    <p>Here’s your collection and playlists.</p>
+    <div class="welcome-card">
+        <h1>Welcome back, <span class="username">{{ current_user.username }}</span>!</h1>
+        <p>🎧 Dive into your favorite albums and discover new hits!</p>
+    </div>
 </section>
 
 <!-- Search Section -->
@@ -36,19 +39,20 @@
                 type="text" 
                 name="query" 
                 class="search-input" 
-                placeholder="Search by album name, artist, or genre..."
+                placeholder="Search by album, artist, or genre..." 
                 required
             >
-            <button type="submit" class="search-btn">Search</button>
+            <button type="submit" class="search-btn">🔍 Search</button>
         </form>
     </div>
 </section>
 
+<!-- Collection Section -->
 <section class="featured-section">
     <h2>My Collection</h2>
     {% if current_user.playlists %}
         {% for playlist in current_user.playlists %}
-            <h3>{{ playlist.name }}</h3>
+            <h3 class="playlist-title">🎵 {{ playlist.name }}</h3>
             <div class="albums-grid">
                 {% for album in playlist.albums %}
                     <div class="album-card">
@@ -58,15 +62,15 @@
                             <div class="album-placeholder">No Image</div>
                         {% endif %}
                         <div class="album-info">
-                            <h3>{{ album.name }}</h3>
-                            <p>{{ album.artist }}</p>
+                            <h3 class="album-name">{{ album.name }}</h3>
+                            <p class="album-artist">{{ album.artist }}</p>
 
                             <!-- Rating form -->
-                            <form method="POST" action="{{ url_for('rate_album', album_id=album.id) }}">
-                                <label for="rating">Rate (0.5–5.0):</label>
+                            <form method="POST" action="{{ url_for('rate_album', album_id=album.id) }}" class="rating-form">
+                                <label for="rating">⭐ Rate (0.5–5.0):</label>
                                 <input type="number" name="rating" step="0.5" min="0.5" max="5"
                                        value="{{ ratings.get(album.id) or '' }}">
-                                <button type="submit">Submit</button>
+                                <button type="submit" class="rate-btn">Submit</button>
                             </form>
                         </div>
                     </div>
@@ -74,10 +78,9 @@
             </div>
         {% endfor %}
     {% else %}
-        <p>You don’t have any albums yet. Go search and add some!</p>
+        <p class="empty-collection">You don’t have any albums yet. Go search and add some!</p>
     {% endif %}
 </section>
 
 </body>
-
 </html>
