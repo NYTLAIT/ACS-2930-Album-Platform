@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Search Results | AlbumRank</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='search_results.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
 </head>
 
@@ -46,7 +46,6 @@
     </div>
 </section>
 
-<<<<<<< HEAD
 <!-- Results Section -->
 <section class="results-section">
     {% if albums %}
@@ -84,47 +83,7 @@
         </div>
     {% endif %}
 </section>
-=======
-    <!-- Results Section -->
-    <section class="results-section">
-    <h2>Search Results for "{{ query }}"</h2>
->>>>>>> 3be4ae70c96cd8b22d66a302fe90ec4b67a5a3ec
 
-    {% if albums %}
-    <div class="albums-grid">
-        {% for album in albums %}
-        <div class="album-card">
-            {% if album.album_art %}
-            <img src="{{ album.album_art }}" alt="{{ album.name }}" class="album-image">
-            {% else %}
-            <div class="album-placeholder">No Image</div>
-            {% endif %}
-            <div class="album-info">
-                <h3>{{ album.name }}</h3>
-                <p class="artist">{{ album.artist }}</p>
-                <p class="release-year">{{ album.release_date }}</p>
-
-                <!-- Add to Collection Form -->
-                <form method="POST" action="{{ url_for('add_to_collection', album_id=album.spotify_id) }}">
-                    <button type="submit" class="add-btn">+ Add to Collection</button>
-                </form>
-
-                <!-- Optional: Ratings (if already in collection) -->
-                {% if album.user_rating %}
-                <form method="POST" action="{{ url_for('rate_album', album_id=album.spotify_id) }}">
-                    <label for="rating">Rate (0.5–5.0):</label>
-                    <input type="number" name="rating" step="0.5" min="0.5" max="5" value="{{ album.user_rating }}">
-                    <button type="submit" class="add-btn">Submit Rating</button>
-                </form>
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <p class="no-results">No albums found.</p>
-    {% endif %}
-</section>
 </body>
 
 </html>

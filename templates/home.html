@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Home | AlbumRank</title>
@@ -11,20 +12,11 @@
 <body>
 
 <!-- Navigation -->
-<<<<<<< HEAD
 <nav class="nav-bar">
     <div class="logo">🎵 AlbumRank</div>
     <div class="nav-links">
         <a href="{{ url_for('home') }}">Home</a>
         <a href="{{ url_for('dashboard') }}">My Collections</a>
-=======
-<nav>
-    <div class="logo">AlbumRank</div>
-    <div class="nav-links">
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('home') }}">My Collections</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
->>>>>>> 3be4ae70c96cd8b22d66a302fe90ec4b67a5a3ec
         <a href="{{ url_for('playlists') }}">Playlists</a>
         <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
     </div>
@@ -32,15 +24,10 @@
 
 <!-- Welcome Section -->
 <section class="welcome-section">
-<<<<<<< HEAD
     <div class="welcome-card">
         <h1>Welcome back, <span class="username">{{ current_user.username }}</span>!</h1>
         <p>🎧 Dive into your favorite albums and discover new hits!</p>
     </div>
-=======
-    <h1>Welcome back, {{ current_user.username }}!</h1>
-    <p>Discover, search, and manage your albums.</p>
->>>>>>> 3be4ae70c96cd8b22d66a302fe90ec4b67a5a3ec
 </section>
 
 <!-- Search Section -->
@@ -52,11 +39,7 @@
                 type="text" 
                 name="query" 
                 class="search-input" 
-<<<<<<< HEAD
                 placeholder="Search by album, artist, or genre..." 
-=======
-                placeholder="Search by album name or artist..."
->>>>>>> 3be4ae70c96cd8b22d66a302fe90ec4b67a5a3ec
                 required
             >
             <button type="submit" class="search-btn">🔍 Search</button>
@@ -64,7 +47,6 @@
     </div>
 </section>
 
-<<<<<<< HEAD
 <!-- Collection Section -->
 <section class="featured-section">
     <h2>My Collection</h2>
@@ -90,65 +72,13 @@
                                        value="{{ ratings.get(album.id) or '' }}">
                                 <button type="submit" class="rate-btn">Submit</button>
                             </form>
-=======
-<!-- User Collection Section -->
-<section class="featured-section">
-    <h2>My Collection</h2>
-
-    {% if playlists %}
-        {% for playlist in playlists %}
-            <h3>{{ playlist.name }}</h3>
-
-            {% if playlist.albums %}
-                <div class="albums-grid">
-
-                    {% for album in playlist.albums %}
-                        <div class="album-card">
-
-                            {% if album.image_url %}
-                                <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-image">
-                            {% else %}
-                                <div class="album-placeholder">No Image</div>
-                            {% endif %}
-
-                            <div class="album-info">
-                                <h3>{{ album.name }}</h3>
-                                <p class="artist">{{ album.artist }}</p>
-                                <p class="release-year">{{ album.release_date }}</p>
-
-                                <!-- Show Existing Rating -->
-                                {% if ratings.get(album.id) %}
-                                    <p>Your Rating: ⭐ {{ ratings.get(album.id) }}</p>
-                                {% endif %}
-
-                                <!-- Rating Form -->
-                                <form method="POST" action="{{ url_for('rate_album', album_id=album.spotify_id) }}">
-                                    <input type="number"
-                                           name="rating"
-                                           step="0.5"
-                                           min="0.5"
-                                           max="5"
-                                           value="{{ ratings.get(album.id, '') }}">
-                                    <button type="submit" class="add-btn">Submit Rating</button>
-                                </form>
-
-                            </div>
->>>>>>> 3be4ae70c96cd8b22d66a302fe90ec4b67a5a3ec
                         </div>
-                    {% endfor %}
-
-                </div>
-            {% else %}
-                <p>No albums in this playlist yet.</p>
-            {% endif %}
-
+                    </div>
+                {% endfor %}
+            </div>
         {% endfor %}
     {% else %}
-<<<<<<< HEAD
         <p class="empty-collection">You don’t have any albums yet. Go search and add some!</p>
-=======
-        <p>You don’t have any playlists yet.</p>
->>>>>>> 3be4ae70c96cd8b22d66a302fe90ec4b67a5a3ec
     {% endif %}
 </section>
 
