@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ album.name }} | AlbumRank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+<body>
+
+<nav class="nav-bar">
+    <div class="logo">🎵 AlbumRank</div>
+    <div class="nav-links">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('playlists') }}">Playlists</a>
+    </div>
+</nav>
+
+<section class="album-detail">
+
+    <div class="album-header">
+        <img src="{{ album.image_url }}" class="detail-image">
+        <div>
+            <h1>{{ album.name }}</h1>
+            <h3>{{ album.artist }}</h3>
+
+            {% if avg_rating %}
+                <p>⭐ Average Rating: {{ avg_rating }}</p>
+            {% else %}
+                <p>No ratings yet</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <hr>
+
+    <h2>Reviews</h2>
+
+    <!-- Review Form -->
+    <form method="POST" action="{{ url_for('add_review', album_id=album.id) }}">
+        <textarea name="content" placeholder="Write a short review..." required></textarea>
+        <select name="rating">
+            <option value="5">❤️ Love it</option>
+            <option value="3">😐 Meh</option>
+            <option value="1">👎 Disliked</option>
+        </select>
+        <button type="submit">Post Review</button>
+    </form>
+
+    <div class="reviews">
+        {% for review in reviews %}
+            <div class="review-card">
+                <strong>{{ review.user.username }}</strong>
+                <p>{{ review.content }}</p>
+                <small>Rating: {{ review.rating }}</small>
+            </div>
+        {% endfor %}
+    </div>
+
+</section>
+
+</body>
+</html>

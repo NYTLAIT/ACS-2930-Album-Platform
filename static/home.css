@@ -115,3 +115,31 @@ body {
     margin-top: 1rem;
     color: #ff5f6d;
 }
+
+/* Ratings */
+
+.rating-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.rate-btn {
+    border: none;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #2a2a2a;
+    color: #ccc;
+}
+
+.rate-btn:hover {
+    transform: scale(1.05);
+}
+
+.rate-btn.selected {
+    background: #1db954;
+    color: white;
+}
