@@ -55,7 +55,7 @@
             <div class="albums-grid">
                 {% for album in playlist.albums %}
                     <div class="album-card">
-                        <a href="{{ url_for('album_detail', album_id=album.id) }}">
+                        <a href="{{ url_for('album_detail', album_id=album.spotify_id) }}">
                             {% if album.image_url %}
                                 <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-image">
                             {% else %}
@@ -67,9 +67,7 @@
                             <p class="album-artist">{{ album.artist }}</p>
                         
                             <!-- Rating form -->
-                            <form class="rating-form" method="POST" action="{{ url_for('rate_album') }}">
-                                <input type="hidden" name="album_id" value="{{ album.id }}">
-
+                            <form class="rating-form" method="POST" action="{{ url_for('rate_album', album_id=album.spotify_id) }}">
                                 <div class="rating-buttons">
                                     <button type="submit" name="rating" value="5" class="rate-btn love">❤️ Love it</button>
                                     <button type="submit" name="rating" value="3" class="rate-btn meh">😐 Meh</button>

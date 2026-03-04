@@ -41,11 +41,18 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
     def load_user(user_id):
         return User.query.get(int(user_id))
     
-    # Initialize Spotify API (DO NOT TOUCH)
-    client_id = os.getenv('CLIENT_ID')
-    client_secret = os.getenv('CLIENT_SECRET')
-    auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-    app.spotify = spotipy.Spotify(auth_manager=auth_manager)
+    # Initialize Spotify API (optional in local/dev)
+    client_id = os.getenv('CLIENT_ID') or os.getenv('SPOTIPY_CLIENT_ID')
+    client_secret = os.getenv('CLIENT_SECRET') or os.getenv('SPOTIPY_CLIENT_SECRET')
+
+    if client_id and client_secret:
+        try:
+            auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+            app.spotify = spotipy.Spotify(auth_manager=auth_manager)
+        except Exception:
+            app.spotify = None
+    else:
+        app.spotify = None
 
 # =======================================================================================================================    
 # === Routes ===                                                                                                        =
@@ -370,12 +377,15 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
         """Search for albums"""
         query = request.args.get('query', '').strip()
         albums = []
-        
-        if query:
+
+        if query and getattr(app, 'spotify', None) is None:
+            flash('Spotify search is not available on this server.', 'warning')
+
+        if query and getattr(app, 'spotify', None) is not None:
             try:
                 # Search using Spotify API with proper parameters
                 results = app.spotify.search(q=query, type='album', limit=10, offset=0)
-                
+
                 for item in results.get('albums', {}).get('items', []):
                     album = {
                         'name': item.get('name', 'Unknown'),
@@ -387,7 +397,7 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
                     albums.append(album)
             except Exception as e:
                 flash(f'Error searching albums: {str(e)}', 'danger')
-        
+
         return render_template('search_results.html', albums=albums, query=query)
     
     return app
