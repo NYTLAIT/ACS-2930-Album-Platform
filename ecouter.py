@@ -11,7 +11,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 from config import DevelopmentConfig
-from models import db, init_db, User, Album, Playlist, Artist, user_album
+from models import db, init_db, User, Album, Playlist, Artist, user_album, Review
 from models.user_album import UserAlbum
 from models.comment import AlbumComment
 from forms import SignupForm, LoginForm
@@ -160,6 +160,26 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
             return redirect(url_for('playlists'))
         return render_template('create_playlist.html')
 
+    # Add to Collection (legacy endpoint used by search_results.html)
+    @app.route('/add_to_collection/<album_id>', methods=['POST'])
+    @login_required
+    def add_to_collection(album_id):
+        album = Album.query.filter_by(spotify_id=album_id).first()
+        if not album:
+            flash("Album not found.", "danger")
+            return redirect(url_for('home'))
+
+        existing = UserAlbum.query.filter_by(user_id=current_user.id, album_id=album.id).first()
+        if existing:
+            flash(f"{album.name} is already in your collection.", "info")
+        else:
+            user_album = UserAlbum(user_id=current_user.id, album_id=album.id)
+            db.session.add(user_album)
+            db.session.commit()
+            flash(f"Added {album.name} to your collection!", "success")
+
+        return redirect(request.referrer or url_for('home'))
+
     @app.route('/album/<album_id>')
     @login_required
     def album_detail(album_id):
@@ -223,26 +243,44 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
             comments=comments,
         )
     
-    # Add to Collection
-    @app.route('/add_to_collection/<album_id>', methods=['POST'])
+    @app.route('/add_to_playlist', methods=['POST'])
     @login_required
-    def add_to_collection(album_id):
-        album = Album.query.filter_by(spotify_id=album_id).first()
-        if not album:
-            flash("Album not found.", "danger")
+    def add_to_playlist():
+        spotify_id = request.form.get('spotify_id')
+        name = request.form.get('name')
+        artist = request.form.get('artist')
+        release_date = request.form.get('release_date')
+        image_url = request.form.get('image_url')
+        playlist_id = request.form.get('playlist_id')
+
+        playlist = Playlist.query.get_or_404(playlist_id)
+
+        if playlist.user_id != current_user.id:
+            flash("Unauthorized.", "danger")
             return redirect(url_for('home'))
 
-        existing = UserAlbum.query.filter_by(user_id=current_user.id, album_id=album.id).first()
-        if existing:
-            flash(f"{album.name} is already in your collection.", "info")
-        else:
-            user_album = UserAlbum(user_id=current_user.id, album_id=album.id)
-            db.session.add(user_album)
+        # Check if album already exists in DB
+        album = Album.query.filter_by(spotify_id=spotify_id).first()
+
+        if not album:
+            album = Album(
+                spotify_id=spotify_id,
+                name=name,
+                artist=artist,
+                release_date=release_date,
+                image_url=image_url
+           )
+            db.session.add(album)
             db.session.commit()
-            flash(f"Added {album.name} to your collection!", "success")
+
+        if album not in playlist.albums:
+            playlist.albums.append(album)
+            db.session.commit()
+            flash("✅ Added to playlist!", "success")
+        else:
+            flash("Already in this playlist.", "info")
 
         return redirect(request.referrer or url_for('home'))
-
 
     @app.route('/album/<album_id>/comment', methods=['POST'])
     @login_required
@@ -265,10 +303,28 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
         flash('Comment added.', 'success')
         return redirect(url_for('album_detail', album_id=album_id))
 
+    @app.route('/edit_playlist/<int:playlist_id>', methods=['POST'])
+    @login_required
+    def edit_playlist(playlist_id):
+        playlist = Playlist.query.get_or_404(playlist_id)
+
+        if playlist.user_id != current_user.id:
+            flash("Unauthorized.", "danger")
+            return redirect(url_for('playlists'))
+
+        new_name = request.form.get('name')
+        if new_name:
+            playlist.name = new_name
+            db.session.commit()
+            flash("Playlist updated!", "success")
+
+        return redirect(url_for('playlists'))
+
 
     @app.route('/rate_album/<album_id>', methods=['POST'])
     @login_required
     def rate_album(album_id):
+        """Rate an album by its Spotify ID using UserAlbum as storage."""
         album = Album.query.filter_by(spotify_id=album_id).first_or_404()
         rating = request.form.get('rating', type=float)
         if not rating or rating < 0.5 or rating > 5:
@@ -284,7 +340,7 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
             flash(f"Add {album.name} to your collection first.", "danger")
 
         return redirect(request.referrer or url_for('home'))
-
+    
     # /home route — acts as dashboard + home
     @app.route('/home')
     @login_required
