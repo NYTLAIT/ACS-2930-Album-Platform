@@ -11,7 +11,9 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 from config import DevelopmentConfig
-from models import db, init_db, User, Album, Playlist, user_album
+from models import db, init_db, User, Album, Playlist, Artist, user_album
+from models.user_album import UserAlbum
+from models.comment import AlbumComment
 from forms import SignupForm, LoginForm
 
 # Load environment variables
@@ -157,6 +159,69 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
             flash('Playlist created!', 'success')
             return redirect(url_for('playlists'))
         return render_template('create_playlist.html')
+
+    @app.route('/album/<album_id>')
+    @login_required
+    def album_detail(album_id):
+        """Album details page with basic rating sidebar and comments."""
+        # Find album by Spotify ID in local DB first
+        album = Album.query.filter_by(spotify_id=album_id).first()
+
+        # If not found locally, try to fetch from Spotify and persist
+        if not album:
+            try:
+                spotify_album = app.spotify.album(album_id)
+            except Exception:
+                flash('Album not found.', 'danger')
+                return redirect(request.referrer or url_for('home'))
+
+            # Create or fetch artist
+            artist_data = spotify_album['artists'][0] if spotify_album.get('artists') else None
+            artist_obj = None
+            if artist_data:
+                artist_obj = Artist.query.filter_by(spotify_id=artist_data['id']).first()
+                if not artist_obj:
+                    artist_obj = Artist(
+                        spotify_id=artist_data['id'],
+                        name=artist_data['name'],
+                        image_url=None,
+                    )
+                    db.session.add(artist_obj)
+
+            album = Album(
+                spotify_id=spotify_album['id'],
+                name=spotify_album['name'],
+                artist=artist_data['name'] if artist_data else 'Unknown',
+                artist_id=artist_obj.id if artist_obj else None,
+                release_date=spotify_album.get('release_date', ''),
+                image_url=spotify_album['images'][0]['url'] if spotify_album.get('images') else None,
+                spotify_url=spotify_album.get('external_urls', {}).get('spotify', ''),
+                description=spotify_album.get('label', None),
+                genres=','.join(spotify_album.get('genres', [])) if spotify_album.get('genres') else None,
+            )
+            db.session.add(album)
+            db.session.commit()
+
+        # User-specific rating (via UserAlbum)
+        user_album = UserAlbum.query.filter_by(user_id=current_user.id, album_id=album.id).first()
+        user_rating = user_album.rating if user_album and user_album.rating is not None else None
+
+        # Aggregate rating across all users
+        from sqlalchemy import func
+        avg_rating = db.session.query(func.avg(UserAlbum.rating)).filter(UserAlbum.album_id == album.id, UserAlbum.rating != None).scalar()
+        ratings_count = db.session.query(func.count(UserAlbum.id)).filter(UserAlbum.album_id == album.id, UserAlbum.rating != None).scalar()
+
+        # Basic (non-threaded) comments for now: top-level only
+        comments = AlbumComment.query.filter_by(album_id=album.id, parent_id=None).order_by(AlbumComment.created_at.desc()).all()
+
+        return render_template(
+            'album_detail.html',
+            album=album,
+            user_rating=user_rating,
+            avg_rating=avg_rating,
+            ratings_count=ratings_count,
+            comments=comments,
+        )
     
     # Add to Collection
     @app.route('/add_to_collection/<album_id>', methods=['POST'])
@@ -177,6 +242,28 @@ def create_app(config_class=DevelopmentConfig): # Check config classes in config
             flash(f"Added {album.name} to your collection!", "success")
 
         return redirect(request.referrer or url_for('home'))
+
+
+    @app.route('/album/<album_id>/comment', methods=['POST'])
+    @login_required
+    def add_album_comment(album_id):
+        """Add a top-level comment to an album."""
+        album = Album.query.filter_by(spotify_id=album_id).first()
+        if not album:
+            flash('Album not found.', 'danger')
+            return redirect(request.referrer or url_for('home'))
+
+        body = request.form.get('body', '').strip()
+        if not body:
+            flash('Comment cannot be empty.', 'danger')
+            return redirect(url_for('album_detail', album_id=album_id))
+
+        comment = AlbumComment(album_id=album.id, user_id=current_user.id, body=body)
+        db.session.add(comment)
+        db.session.commit()
+
+        flash('Comment added.', 'success')
+        return redirect(url_for('album_detail', album_id=album_id))
 
 
     @app.route('/rate_album/<album_id>', methods=['POST'])

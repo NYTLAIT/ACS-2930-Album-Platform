@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ album.name }} | AlbumRank</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+<body>
+
+<nav>
+    <div class="logo">AlbumRank</div>
+    <div class="nav-links">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('playlists') }}">Playlists</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</nav>
+
+<section class="album-detail-layout">
+    <!-- Main column -->
+    <div class="album-main">
+        <div class="album-hero">
+            {% if album.image_url %}
+                <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-image-large">
+            {% else %}
+                <div class="album-placeholder-large">No Cover</div>
+            {% endif %}
+            <div class="album-meta">
+                <h1>{{ album.name }}</h1>
+                <p class="artist">
+                    {{ album.artist }}
+                </p>
+                <p class="release-year">
+                    {{ album.release_date }}
+                </p>
+                {% if album.spotify_url %}
+                    <a href="{{ album.spotify_url }}" target="_blank" class="add-btn">Open in Spotify</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Placeholder for tracklist / description (can be expanded later) -->
+        <section class="album-section">
+            <h2>About this album</h2>
+            {% if album.description %}
+                <p>{{ album.description }}</p>
+            {% else %}
+                <p>No additional description available yet.</p>
+            {% endif %}
+        </section>
+
+        <!-- Comments -->
+        <section class="album-section">
+            <h2>Comments</h2>
+
+            <form method="POST" action="{{ url_for('add_album_comment', album_id=album.spotify_id) }}" class="comment-form">
+                <textarea name="body" rows="3" placeholder="Share your thoughts about this album..." required></textarea>
+                <button type="submit" class="add-btn">Post Comment</button>
+            </form>
+
+            {% if comments %}
+                <ul class="comment-list">
+                    {% for comment in comments %}
+                        <li class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-author">{{ comment.user.username }}</span>
+                                <span class="comment-date">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                            </div>
+                            <p class="comment-body">{{ comment.body }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No comments yet. Be the first to comment!</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="album-sidebar">
+        <div class="rating-panel">
+            <h2>Ratings</h2>
+
+            {% if user_rating %}
+                <p>Your Rating: ⭐ {{ '%.1f'|format(user_rating) }}</p>
+            {% else %}
+                <p>You haven't rated this album yet.</p>
+            {% endif %}
+
+            {% if avg_rating %}
+                <p>Average Rating: ⭐ {{ '%.1f'|format(avg_rating) }} ({{ ratings_count }} ratings)</p>
+            {% else %}
+                <p>No ratings yet.</p>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('rate_album', album_id=album.spotify_id) }}" class="rating-form">
+                <label for="rating">Rate (0.5–5.0):</label>
+                <input type="number" name="rating" step="0.5" min="0.5" max="5" value="{{ user_rating or '' }}">
+                <button type="submit" class="add-btn">Submit Rating</button>
+            </form>
+        </div>
+    </aside>
+</section>
+
+</body>
+</html>
