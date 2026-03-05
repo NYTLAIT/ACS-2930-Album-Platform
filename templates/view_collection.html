@@ -71,11 +71,13 @@
         <div class="albums-grid" id="albumGrid">
             {% for album in collection.albums %}
             <div class="album-card" id="col-card-{{ album.id }}">
-                {% if album.image_url %}
-                <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-image">
-                {% else %}
-                <div class="album-placeholder">No cover</div>
-                {% endif %}
+                <a href="{{ url_for('album_detail', album_id=album.id) }}">
+                    {% if album.image_url %}
+                    <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-image">
+                    {% else %}
+                    <div class="album-placeholder">No cover</div>
+                    {% endif %}
+                </a>
                 <div class="album-info">
                     <p class="album-name">
                         <a href="{{ url_for('album_detail', album_id=album.id) }}">{{ album.name }}</a>

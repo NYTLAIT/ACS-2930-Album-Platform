@@ -86,6 +86,46 @@
         </div>
     </section>
 
+{# ════════════════════════════════════════════════════════════
+MACRO: scroll_card
+album — Album object
+user_rating — 1, -1, or None
+like_count — optional int badge
+════════════════════════════════════════════════════════════ #}
+{% macro scroll_card(album, user_rating, like_count=None) %}
+<div class="scroll-card" id="card-{{ album.id }}">
+    <a href="{{ url_for('album_detail', album_id=album.id) }}" class="scroll-card-img-link">
+        {% if album.image_url %}
+        <img src="{{ album.image_url }}" alt="{{ album.name }}" class="scroll-card-img">
+        {% else %}
+        <div class="scroll-card-img-empty">No cover</div>
+        {% endif %}
+        {% if like_count %}
+        <span class="like-badge">{{ like_count }} liked</span>
+        {% endif %}
+    </a>
+    <div class="scroll-card-info">
+        <p class="scroll-card-name">
+            <a href="{{ url_for('album_detail', album_id=album.id) }}">{{ album.name }}</a>
+        </p>
+        <p class="scroll-card-artist">
+            {% if album.artist_id %}
+            <a href="{{ url_for('artist_page', spotify_artist_id=album.artist_id) }}" class="artist-link">{{
+                album.artist }}</a>
+            {% else %}
+            {{ album.artist }}
+            {% endif %}
+        </p>
+        <div class="scroll-card-rating">
+            <button class="btn-rate btn-like {% if user_rating == 1 %}active{% endif %}" data-album-id="{{ album.id }}"
+                data-rating="1">Like</button>
+            <button class="btn-rate btn-dislike {% if user_rating == -1 %}active{% endif %}"
+                data-album-id="{{ album.id }}" data-rating="-1">Dislike</button>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
     {# ── Page body ── #}
     <div class="dashboard-body">
 
@@ -144,9 +184,13 @@
         {% if no_public_albums %}
         <section class="dash-section">
             <div class="discovery-empty">
-                <h3>Discovery sections will appear here</h3>
+                <!-- <h3>Discovery sections will appear here</h3>
                 <p>Once users add albums to public collections, trending, top rated, and new arrivals will show here.
                     Make your collections public to contribute.</p>
+                <a href="{{ url_for('collections') }}" class="btn-primary">Manage Collections</a> -->
+                <h3>Discovery sections will appear here</h3>
+                <p>Once users add albums to collections, trending, top rated, and new arrivals will show here.
+                    Add to to your collections and rate albums to contibrute.</p>
                 <a href="{{ url_for('collections') }}" class="btn-primary">Manage Collections</a>
             </div>
         </section>
@@ -247,46 +291,6 @@
     </div>{# end dashboard-body #}
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-    {# ════════════════════════════════════════════════════════════
-    MACRO: scroll_card
-    album — Album object
-    user_rating — 1, -1, or None
-    like_count — optional int badge
-    ════════════════════════════════════════════════════════════ #}
-    {% macro scroll_card(album, user_rating, like_count=None) %}
-    <div class="scroll-card" id="card-{{ album.id }}">
-        <a href="{{ url_for('album_detail', album_id=album.id) }}" class="scroll-card-img-link">
-            {% if album.image_url %}
-            <img src="{{ album.image_url }}" alt="{{ album.name }}" class="scroll-card-img">
-            {% else %}
-            <div class="scroll-card-img-empty">No cover</div>
-            {% endif %}
-            {% if like_count %}
-            <span class="like-badge">{{ like_count }} liked</span>
-            {% endif %}
-        </a>
-        <div class="scroll-card-info">
-            <p class="scroll-card-name">
-                <a href="{{ url_for('album_detail', album_id=album.id) }}">{{ album.name }}</a>
-            </p>
-            <p class="scroll-card-artist">
-                {% if album.artist_id %}
-                <a href="{{ url_for('artist_page', spotify_artist_id=album.artist_id) }}" class="artist-link">{{
-                    album.artist }}</a>
-                {% else %}
-                {{ album.artist }}
-                {% endif %}
-            </p>
-            <div class="scroll-card-rating">
-                <button class="btn-rate btn-like {% if user_rating == 1 %}active{% endif %}"
-                    data-album-id="{{ album.id }}" data-rating="1">Like</button>
-                <button class="btn-rate btn-dislike {% if user_rating == -1 %}active{% endif %}"
-                    data-album-id="{{ album.id }}" data-rating="-1">Dislike</button>
-            </div>
-        </div>
-    </div>
-    {% endmacro %}
 
     <script>
         document.addEventListener("click", function (e) {

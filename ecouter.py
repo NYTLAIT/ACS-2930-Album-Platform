@@ -272,7 +272,7 @@ def create_app(config_class=DevelopmentConfig):
             )
 
         # ── Discovery: Trending this week ─────────────────────
-        one_week_ago  = datetime.utcnow() - timedelta(days=7)
+        one_week_ago  = datetime.now() - timedelta(days=7)
         trending_rows = (
             db.session.query(Album, func.count(UserAlbum.id).label("like_count"))
             .join(UserAlbum, UserAlbum.album_id == Album.id)
@@ -391,7 +391,7 @@ def create_app(config_class=DevelopmentConfig):
 
         # Stamp last_opened_at so the dashboard shows recent activity
         if collection.user_id == current_user.id:
-            collection.last_opened_at = datetime.utcnow()
+            collection.last_opened_at = datetime.now()
             db.session.commit()
 
         ratings = get_user_ratings(current_user.id)
@@ -524,7 +524,7 @@ def create_app(config_class=DevelopmentConfig):
             })
 
         collection.albums.append(album)
-        collection.last_opened_at = datetime.utcnow()
+        collection.last_opened_at = datetime.now()
         db.session.commit()
 
         return jsonify({
@@ -670,12 +670,12 @@ def create_app(config_class=DevelopmentConfig):
             user_id=current_user.id, album_id=album.id
         ).first()
         if user_album:
-            user_album.last_viewed_at = datetime.utcnow()
+            user_album.last_viewed_at = datetime.now()
         else:
             user_album = UserAlbum(
                 user_id=current_user.id,
                 album_id=album.id,
-                last_viewed_at=datetime.utcnow(),
+                last_viewed_at=datetime.now(),
             )
             db.session.add(user_album)
         db.session.commit()
