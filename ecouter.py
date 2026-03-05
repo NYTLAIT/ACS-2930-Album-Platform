@@ -20,14 +20,9 @@ import json
 from datetime import datetime, timedelta
 
 import spotipy
-from flask import (
-    Flask, flash, jsonify, redirect, render_template,
-    request, url_for,
-)
-from flask_login import (
-    LoginManager, current_user, login_required,
-    login_user, logout_user,
-)
+from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
+from flask_login import LoginManager, current_user, login_required, login_user, logout_user
+
 from spotipy.oauth2 import SpotifyClientCredentials
 from sqlalchemy import func
 
@@ -39,7 +34,11 @@ from models import (
     User, RATING_LIKE, RATING_DISLIKE,
     db, init_db, seed_mood_tags,
 )
+from forms import SignupForm, LoginForm
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Application factory
@@ -67,12 +66,10 @@ def create_app(config_class=DevelopmentConfig):
         return User.query.get(int(user_id))
 
     # ── Spotify client ────────────────────────────────────────
-    app.spotify = spotipy.Spotify(
-        auth_manager=SpotifyClientCredentials(
-            client_id=app.config["SPOTIFY_CLIENT_ID"],
-            client_secret=app.config["SPOTIFY_CLIENT_SECRET"],
-        )
-    )
+    client_id = os.getenv('CLIENT_ID')
+    client_secret = os.getenv('CLIENT_SECRET')
+    auth_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
+    app.spotify = spotipy.Spotify(auth_manager=auth_manager)
 
     # ── Seed mood tags on startup ─────────────────────────────
     with app.app_context():
@@ -122,7 +119,6 @@ def create_app(config_class=DevelopmentConfig):
         if current_user.is_authenticated:
             return redirect(url_for("dashboard"))
 
-        from forms import SignupForm
         form = SignupForm()
 
         if form.validate_on_submit():
@@ -149,7 +145,6 @@ def create_app(config_class=DevelopmentConfig):
         if current_user.is_authenticated:
             return redirect(url_for("dashboard"))
 
-        from forms import LoginForm
         form = LoginForm()
 
         if form.validate_on_submit():
