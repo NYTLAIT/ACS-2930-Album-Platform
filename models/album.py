@@ -1,60 +1,42 @@
-# models/album.py
-# The Album model stores albums retrieved from the Spotify API.
-# Albums are shared across all users — if two users add the same
-# album, only one row exists here. The per-user data (rating, notes,
-# moods) lives in UserAlbum and AlbumMood.
+"""
+models/album.py
 
+One Album row represents one unique Spotify album shared across all users.
+Albums are created the first time any user adds them to a collection.
+
+tracklist is stored as a JSON string because SQLite does not have a native
+JSON column type. Parse it with json.loads() when you need the list.
+
+Relationships defined here (one side):
+  - user_albums: UserAlbum rows linking users to this album
+  - album_moods: AlbumMood rows (mood tags applied to this album)
+  - comments   : Comment rows posted on this album
+  - collections: Collection rows that include this album (via join table,
+                 defined on the Collection side)
+"""
 from .database import db
 
 
 class Album(db.Model):
-    __tablename__ = 'albums'
+    __tablename__ = "albums"
 
     id           = db.Column(db.Integer,     primary_key=True)
-    spotify_id   = db.Column(db.String(50),  unique=True, nullable=False)
+    spotify_id   = db.Column(db.String(100), unique=True, nullable=False, index=True)
     name         = db.Column(db.String(255), nullable=False)
     artist       = db.Column(db.String(255), nullable=False)
-    artist_id    = db.Column(db.String(50))   # Spotify artist ID, used for artist page
-    release_date = db.Column(db.String(10))   # Format: YYYY-MM-DD
-    image_url    = db.Column(db.String(500))
-    spotify_url  = db.Column(db.String(500))
+    artist_id    = db.Column(db.String(100), nullable=True)   # Spotify artist ID
+    release_date = db.Column(db.String(20),  nullable=True)
+    image_url    = db.Column(db.String(500), nullable=True)
+    spotify_url  = db.Column(db.String(500), nullable=True)
+    tracklist    = db.Column(db.Text,        nullable=True)   # JSON string
+    duration_ms  = db.Column(db.Integer,     nullable=True)   # total album ms
+    total_tracks = db.Column(db.Integer,     nullable=True)
 
-    # Track data stored as plain text (JSON string).
-    # Format: '[{"name": "Track 1", "duration_ms": 210000}, ...]'
-    # We store it as a string to keep the model simple.
-    # In templates, use the `|fromjson` filter or parse in the route.
-    tracklist    = db.Column(db.Text)
+    # Relationships
+    user_albums  = db.relationship("UserAlbum", back_populates="album", lazy="select")
+    album_moods  = db.relationship("AlbumMood",  back_populates="album", lazy="select")
+    comments     = db.relationship("Comment",    back_populates="album", lazy="select",
+                                   order_by="Comment.created_at")
 
-    # Total album duration in milliseconds (from Spotify)
-    duration_ms  = db.Column(db.Integer)
-
-    # Total number of tracks
-    total_tracks = db.Column(db.Integer)
-
-    # --- Relationships ---
-    # All per-user rating/notes entries for this album
-    user_albums = db.relationship(
-        'UserAlbum',
-        backref='album',
-        lazy=True,
-        cascade='all, delete-orphan'
-    )
-
-    # All mood tags applied to this album by any user
-    album_moods = db.relationship(
-        'AlbumMood',
-        backref='album',
-        lazy=True,
-        cascade='all, delete-orphan'
-    )
-
-    # All comments on this album
-    comments = db.relationship(
-        'Comment',
-        backref='album',
-        lazy=True,
-        cascade='all, delete-orphan'
-    )
-
-    def __repr__(self):
-        return f'<Album {self.name} by {self.artist}>'
+    def __repr__(self) -> str:
+        return f"<Album id={self.id} name={self.name!r} artist={self.artist!r}>"

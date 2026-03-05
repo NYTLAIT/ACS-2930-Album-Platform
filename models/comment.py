@@ -1,69 +1,74 @@
-# models/comment.py
-# Two models live here:
-#
-# Comment     — a comment posted by a user on an album detail page.
-#               Comments can reply to other comments (threading) via parent_id.
-#
-# CommentVote — records one user's vote on one comment.
-#               value = 1 means upvote, value = -1 means downvote.
-#               A user can remove their vote by deleting this row (toggle behaviour).
-#               One vote per user per comment is enforced by the unique constraint.
+"""
+models/comment.py
 
+Comment supports threading via the self-referential parent_id foreign key.
+  - parent_id = None  → top-level comment
+  - parent_id = int   → reply to that comment
+
+The score property sums all CommentVote values (upvotes - downvotes).
+Computed on access — not stored in the database.
+
+CommentVote stores one vote per user per comment.
+  value = 1  → upvote
+  value = -1 → downvote
+Toggle logic (same vote removes it, opposite vote switches) is in the route.
+"""
 from datetime import datetime
 from .database import db
 
 
 class Comment(db.Model):
-    __tablename__ = 'comments'
+    __tablename__ = "comments"
 
-    id         = db.Column(db.Integer, primary_key=True)
-    content    = db.Column(db.Text,    nullable=False)
-    user_id    = db.Column(db.Integer, db.ForeignKey('users.id'),  nullable=False)
-    album_id   = db.Column(db.Integer, db.ForeignKey('albums.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    id         = db.Column(db.Integer,  primary_key=True)
+    content    = db.Column(db.Text,     nullable=False)
+    user_id    = db.Column(db.Integer,  db.ForeignKey("users.id",    ondelete="CASCADE"),
+                           nullable=False, index=True)
+    album_id   = db.Column(db.Integer,  db.ForeignKey("albums.id",   ondelete="CASCADE"),
+                           nullable=False, index=True)
+    parent_id  = db.Column(db.Integer,  db.ForeignKey("comments.id", ondelete="CASCADE"),
+                           nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    # parent_id is None for top-level comments.
-    # If set, this comment is a reply to the comment with that id.
-    parent_id  = db.Column(db.Integer, db.ForeignKey('comments.id'), nullable=True)
-
-    # replies gives easy access to all direct replies to this comment
+    # Self-referential relationship for threading
     replies = db.relationship(
-        'Comment',
-        backref=db.backref('parent', remote_side=[id]),
-        lazy=True
+        "Comment",
+        backref=db.backref("parent", remote_side="Comment.id"),
+        lazy="select",
     )
 
-    # votes gives access to all vote rows for this comment
-    votes = db.relationship(
-        'CommentVote',
-        backref='comment',
-        lazy=True,
-        cascade='all, delete-orphan'
-    )
+    # Relationships to other models
+    author = db.relationship("User",  back_populates="comments")
+    album  = db.relationship("Album", back_populates="comments")
+    votes  = db.relationship("CommentVote", back_populates="comment",
+                             cascade="all, delete-orphan", lazy="select")
 
     @property
-    def score(self):
-        """Total score = upvotes minus downvotes."""
+    def score(self) -> int:
+        """Upvotes minus downvotes. Computed from loaded votes."""
         return sum(v.value for v in self.votes)
 
-    def __repr__(self):
-        return f'<Comment {self.id} by user={self.user_id} on album={self.album_id}>'
+    def __repr__(self) -> str:
+        return f"<Comment id={self.id} user={self.user_id} album={self.album_id}>"
 
 
 class CommentVote(db.Model):
-    __tablename__ = 'comment_votes'
+    __tablename__ = "comment_votes"
 
     id         = db.Column(db.Integer, primary_key=True)
-    user_id    = db.Column(db.Integer, db.ForeignKey('users.id'),    nullable=False)
-    comment_id = db.Column(db.Integer, db.ForeignKey('comments.id'), nullable=False)
+    user_id    = db.Column(db.Integer, db.ForeignKey("users.id",    ondelete="CASCADE"),
+                           nullable=False)
+    comment_id = db.Column(db.Integer, db.ForeignKey("comments.id", ondelete="CASCADE"),
+                           nullable=False, index=True)
+    value      = db.Column(db.Integer, nullable=False)  # 1 or -1
 
-    # 1 = upvote, -1 = downvote
-    value      = db.Column(db.Integer, nullable=False)
-
-    # One user can only have one vote per comment
     __table_args__ = (
-        db.UniqueConstraint('user_id', 'comment_id', name='unique_comment_vote'),
+        db.UniqueConstraint("user_id", "comment_id", name="uq_comment_vote"),
     )
 
-    def __repr__(self):
-        return f'<CommentVote user={self.user_id} comment={self.comment_id} value={self.value}>'
+    # Relationships
+    voter   = db.relationship("User",    back_populates="comment_votes")
+    comment = db.relationship("Comment", back_populates="votes")
+
+    def __repr__(self) -> str:
+        return f"<CommentVote user={self.user_id} comment={self.comment_id} value={self.value}>"

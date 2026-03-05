@@ -1,0 +1,211 @@
+<!-- templates/artist.html 
+Artist page. All data is fetched live from Spotify in the artist_page route.
+No database writes happen here — it is a read-only display page.
+
+Variables passed from the artist_page route in ecouter.py:
+artist — dict with keys:
+name, image_url, followers, genres
+albums — list of dicts, each with:
+spotify_id, name, release_date, image_url, total_tracks,
+local_id (int or None — our db id if we have this album),
+user_rating (1, -1, or None — only set if local_id is set)
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ artist.name }} | AlbumRank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='artist.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    {# ── Navigation ── #}
+    <nav class="nav-bar">
+        <div class="logo">AlbumRank</div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('collections') }}">Collections</a>
+            <a href="{{ url_for('search') }}">Search</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
+        </div>
+    </nav>
+
+
+    {# -- Back navigation -- #}
+    <div class="back-bar">
+        <div class="back-bar-inner">
+            <a href="javascript:history.back()" class="back-link">&#8592; Back</a>
+        </div>
+    </div>
+
+    {# ── Flash messages ── #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {# ── Artist hero ── #}
+    <section class="artist-hero">
+
+        {# Background blur uses the artist image as a decorative element #}
+        {% if artist.image_url %}
+        <div class="artist-hero-bg" style="background-image: url('{{ artist.image_url }}');" aria-hidden="true"></div>
+        {% endif %}
+
+        <div class="artist-hero-inner">
+
+            {# Artist photo #}
+            <div class="artist-photo-wrap">
+                {% if artist.image_url %}
+                <img src="{{ artist.image_url }}" alt="{{ artist.name }}" class="artist-photo">
+                {% else %}
+                <div class="artist-photo artist-photo-empty">
+                    {{ artist.name[:1] }}
+                </div>
+                {% endif %}
+            </div>
+
+            {# Artist info #}
+            <div class="artist-info">
+                <p class="artist-type-label">Artist</p>
+                <h1 class="artist-name">{{ artist.name }}</h1>
+
+                <div class="artist-meta">
+                    {# Follower count formatted with commas #}
+                    <span class="artist-followers">
+                        {{ '{:,}'.format(artist.followers) }} followers
+                    </span>
+
+                    {# Genre tags #}
+                    {% if artist.genres %}
+                    <span class="meta-sep">&middot;</span>
+                    <div class="genre-tags">
+                        {% for genre in artist.genres[:4] %}
+                        <span class="genre-tag">{{ genre }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                {# Album count #}
+                <p class="artist-album-count">
+                    {{ albums | length }}
+                    {{ 'album' if albums | length == 1 else 'albums' }}
+                    on AlbumRank
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    {# ── Discography ── #}
+    <section class="discography-section">
+        <div class="discography-inner">
+
+            <h2 class="discography-heading">Discography</h2>
+
+            {% if albums %}
+            <div class="albums-grid">
+                {% for album in albums %}
+
+                <div class="album-card" id="artist-album-{{ album.spotify_id }}">
+
+                    {# Cover — links to detail page if we have it locally #}
+                    {% if album.local_id %}
+                    <a href="{{ url_for('album_detail', album_id=album.local_id) }}">
+                        {% if album.image_url %}
+                        <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-image">
+                        {% else %}
+                        <div class="album-placeholder">No cover</div>
+                        {% endif %}
+                    </a>
+                    {% else %}
+                    {% if album.image_url %}
+                    <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-image">
+                    {% else %}
+                    <div class="album-placeholder">No cover</div>
+                    {% endif %}
+                    {% endif %}
+
+                    <div class="album-info">
+
+                        {# Album title #}
+                        {% if album.local_id %}
+                        <h3 class="album-name">
+                            <a href="{{ url_for('album_detail', album_id=album.local_id) }}">
+                                {{ album.name }}
+                            </a>
+                        </h3>
+                        {% else %}
+                        <h3 class="album-name">{{ album.name }}</h3>
+                        {% endif %}
+
+                        {# Release year and track count #}
+                        <div class="album-card-meta">
+                            {% if album.release_date %}
+                            <span>{{ album.release_date[:4] }}</span>
+                            {% endif %}
+                            {% if album.total_tracks %}
+                            <span class="meta-sep">&middot;</span>
+                            <span>{{ album.total_tracks }} tracks</span>
+                            {% endif %}
+                        </div>
+
+                        {#
+                        Rating badge — only shown if the album is in our database
+                        and the user has rated it.
+                        #}
+                        {% if album.local_id %}
+                        <div class="card-rating-state">
+                            {% if album.user_rating == 1 %}
+                            <span class="rating-badge rating-liked">Liked</span>
+                            {% elif album.user_rating == -1 %}
+                            <span class="rating-badge rating-disliked">Disliked</span>
+                            {% else %}
+                            <span class="rating-badge rating-unrated">Not rated</span>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        {#
+                        Album not in our database yet.
+                        Show a search link so the user can find and add it.
+                        #}
+                        <div class="card-rating-state">
+                            <a href="{{ url_for('search', query=album.name) }}" class="btn-find-album">
+                                Find on AlbumRank
+                            </a>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+                {% endfor %}
+            </div>
+
+            {% else %}
+            <div class="no-results">
+                <h2>No albums found</h2>
+                <p>Spotify did not return any albums for this artist.</p>
+            </div>
+            {% endif %}
+
+        </div>
+    </section>
+
+    <a href="javascript:history.back()" class="back-fab" aria-label="Go back">&#8592; Back</a>
+
+</body>
+
+</html>

@@ -1,0 +1,139 @@
+<!--templates/landing.html #}
+
+Public landing page.
+No variables passed from the route — this page is fully static.
+Shown to users who are not logged in when they visit /.
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlbumRank | Discover Albums Differently</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    {# ── Navigation ── #}
+    <nav class="nav-bar">
+        <div class="logo">AlbumRank</div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="{{ url_for('login') }}">Log in</a>
+            <a href="{{ url_for('signup') }}" class="nav-cta">Get started</a>
+        </div>
+    </nav>
+
+    {# ── Hero ── #}
+    <section class="hero">
+        <div class="hero-inner">
+            <p class="hero-eyebrow">For people who actually listen to albums</p>
+            <h1 class="hero-heading">
+                Rate, collect, and explore<br>music the way it was made.
+            </h1>
+            <p class="hero-body">
+                AlbumRank is built around the album — not the single, not the playlist.
+                Track what you love, discover what you have been missing,
+                and share your taste with people who care.
+            </p>
+            <div class="hero-actions">
+                <a href="{{ url_for('signup') }}" class="btn-hero-primary">Create a free account</a>
+                <a href="{{ url_for('login') }}" class="btn-hero-ghost">Log in</a>
+            </div>
+        </div>
+
+        {# Decorative background shape — pure CSS, no image needed #}
+        <div class="hero-glow" aria-hidden="true"></div>
+    </section>
+
+    {# ── Features ── #}
+    <section class="features-section" id="features">
+        <div class="features-inner">
+            <h2 class="section-heading">Everything built around the album</h2>
+            <p class="section-sub">
+                No distractions. No algorithms forcing singles on you.
+                Just albums, your opinions, and a community that gets it.
+            </p>
+
+            <div class="features-grid">
+
+                <div class="feature-card">
+                    <div class="feature-icon" aria-hidden="true"></div>
+                    <h3>Build your collections</h3>
+                    <p>
+                        Organise albums into collections that make sense to you.
+                        Keep them private or share them publicly.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon" aria-hidden="true"></div>
+                    <h3>Like and dislike</h3>
+                    <p>
+                        A simple, honest rating system. No five-star overthinking.
+                        Like it or dislike it — your collection reflects your actual taste.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon" aria-hidden="true"></div>
+                    <h3>Tag the mood</h3>
+                    <p>
+                        Apply mood tags to albums — Hype, Melancholic, Focused, Dreamy.
+                        See what moods other listeners are feeling from the same record.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon" aria-hidden="true"></div>
+                    <h3>Discuss, vote, reply</h3>
+                    <p>
+                        Comment on albums with threaded replies and Reddit-style voting.
+                        Real conversations about real music.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon" aria-hidden="true"></div>
+                    <h3>Full tracklists</h3>
+                    <p>
+                        Every album detail page shows the complete tracklist with
+                        track lengths and total album duration, pulled from Spotify.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon" aria-hidden="true"></div>
+                    <h3>Artist pages</h3>
+                    <p>
+                        Click any artist name to see their full discography,
+                        with your ratings and community mood data inline.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    {# ── Call to action ── #}
+    <section class="cta-section">
+        <div class="cta-inner">
+            <h2>Start building your collection today.</h2>
+            <p>Free to use. No ads. Just music.</p>
+            <a href="{{ url_for('signup') }}" class="btn-cta">Create a free account</a>
+        </div>
+    </section>
+
+    {# ── Footer ── #}
+    <footer class="site-footer">
+        <p>AlbumRank &mdash; built for album listeners.</p>
+    </footer>
+
+</body>
+
+</html>

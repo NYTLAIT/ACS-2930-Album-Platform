@@ -1,0 +1,639 @@
+{# templates/album_detail.html #}
+{#
+Album detail page — two column layout.
+Left column: artwork, album info, tracklist, comments.
+Right sidebar: like/dislike, total counts, mood tags, private notes.
+
+Variables passed from the album_detail route in ecouter.py:
+album — Album object
+tracks — list of dicts: {name, duration_ms, duration, track_number}
+album_duration — formatted string e.g. "42:17"
+user_rating — 1, -1, or None
+user_notes — string or None
+total_likes — int
+total_dislikes — int
+mood_counts — list of (MoodTag, count) tuples, ordered by count desc
+user_mood_ids — list of mood_tag_id ints the current user has applied
+moods_by_category — dict of { category: [MoodTag, ...] }
+comments — list of top-level Comment objects (replies via .replies)
+user_votes — dict of { comment_id: vote_value }
+RATING_LIKE — 1
+RATING_DISLIKE — -1
+#}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ album.name }} | AlbumRank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='album_detail.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    {# ── Navigation ── #}
+    <nav class="nav-bar">
+        <div class="logo">AlbumRank</div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('collections') }}">Collections</a>
+            <a href="{{ url_for('search') }}">Search</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
+        </div>
+    </nav>
+
+
+    {# -- Back navigation -- #}
+    <div class="back-bar">
+        <div class="back-bar-inner">
+            <a href="javascript:history.back()" class="back-link">&#8592; Back</a>
+        </div>
+    </div>
+
+    {# ── Flash messages ── #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {# ── Two-column layout ── #}
+    <div class="detail-layout">
+
+        {# ==================================================================
+        LEFT COLUMN — artwork, info, tracklist, comments
+        ================================================================== #}
+        <main class="detail-main">
+
+            {# ── Album header ── #}
+            <div class="album-header">
+                <div class="album-cover-wrap">
+                    {% if album.image_url %}
+                    <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-cover">
+                    {% else %}
+                    <div class="album-cover album-cover-empty">No cover</div>
+                    {% endif %}
+                </div>
+
+                <div class="album-header-info">
+                    <p class="detail-label">Album</p>
+                    <h1 class="detail-album-title">{{ album.name }}</h1>
+
+                    {% if album.artist_id %}
+                    <p class="detail-artist">
+                        <a href="{{ url_for('artist_page', spotify_artist_id=album.artist_id) }}" class="artist-link">
+                            {{ album.artist }}
+                        </a>
+                    </p>
+                    {% else %}
+                    <p class="detail-artist">{{ album.artist }}</p>
+                    {% endif %}
+
+                    <div class="album-meta-row">
+                        {% if album.release_date %}
+                        <span>{{ album.release_date[:4] }}</span>
+                        <span class="meta-sep">&middot;</span>
+                        {% endif %}
+                        {% if album.total_tracks %}
+                        <span>{{ album.total_tracks }} tracks</span>
+                        <span class="meta-sep">&middot;</span>
+                        {% endif %}
+                        {% if album_duration %}
+                        <span>{{ album_duration }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {# ── Tracklist ── #}
+            {% if tracks %}
+            <section class="detail-section">
+                <h2 class="section-title">Tracklist</h2>
+                <ol class="tracklist">
+                    {% for track in tracks %}
+                    <li class="track-row">
+                        <span class="track-number">{{ track.track_number }}</span>
+                        <span class="track-name">{{ track.name }}</span>
+                        <span class="track-duration">{{ track.duration }}</span>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </section>
+            {% endif %}
+
+            {# ── Comments ── #}
+            <section class="detail-section" id="comments">
+                <h2 class="section-title">
+                    Comments
+                    <span class="comment-count">({{ comments | length }})</span>
+                </h2>
+
+                {# Post a new top-level comment #}
+                <form method="POST" action="{{ url_for('post_comment') }}" class="comment-form">
+                    <input type="hidden" name="album_id" value="{{ album.id }}">
+                    <textarea name="content" class="comment-input" rows="3" placeholder="Write a comment..."
+                        maxlength="2000" required></textarea>
+                    <div class="comment-form-actions">
+                        <button type="submit" class="btn-post-comment">Post comment</button>
+                    </div>
+                </form>
+
+                {# Comment list #}
+                {% if comments %}
+                <div class="comment-list" id="commentList">
+                    {% for comment in comments %}
+                    {{ render_comment(comment, user_votes, album.id, depth=0) }}
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="no-comments">No comments yet. Be the first to leave one.</p>
+                {% endif %}
+            </section>
+
+        </main>
+
+        {# ==================================================================
+        RIGHT SIDEBAR — rating, mood tags, private notes
+        ================================================================== #}
+        <aside class="detail-sidebar">
+
+            {# ── Like / Dislike ── #}
+            <div class="sidebar-card" id="ratingCard">
+                <h3 class="sidebar-card-title">Your Rating</h3>
+
+                <div class="rating-buttons">
+                    <button class="btn-rate btn-like {% if user_rating == 1 %}active{% endif %}"
+                        data-album-id="{{ album.id }}" data-rating="1" id="btnLike">
+                        Like
+                    </button>
+                    <button class="btn-rate btn-dislike {% if user_rating == -1 %}active{% endif %}"
+                        data-album-id="{{ album.id }}" data-rating="-1" id="btnDislike">
+                        Dislike
+                    </button>
+                </div>
+
+                {# Community totals #}
+                <div class="rating-totals">
+                    <div class="rating-total like-total">
+                        <span class="total-count" id="totalLikes">{{ total_likes }}</span>
+                        <span class="total-label">liked</span>
+                    </div>
+                    <div class="rating-total dislike-total">
+                        <span class="total-count" id="totalDislikes">{{ total_dislikes }}</span>
+                        <span class="total-label">disliked</span>
+                    </div>
+                </div>
+            </div>
+
+            {# ── Mood tags ── #}
+            <div class="sidebar-card">
+                <h3 class="sidebar-card-title">
+                    Mood Tags
+                    <span class="mood-limit-note" id="moodLimitNote">
+                        {% set remaining = 3 - user_mood_ids | length %}
+                        {{ remaining }} of 3 remaining
+                    </span>
+                </h3>
+
+                {# Aggregated mood counts — visible to everyone #}
+                {% if mood_counts %}
+                <div class="mood-summary">
+                    {% for mood_tag, count in mood_counts[:6] %}
+                    <div class="mood-bar-row">
+                        <span class="mood-bar-label">{{ mood_tag.name }}</span>
+                        <span class="mood-bar-count">{{ count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <hr class="mood-divider">
+                {% endif %}
+
+                {# Tag picker — grouped by category #}
+                <div class="mood-picker">
+                    {% for category, tags in moods_by_category.items() %}
+                    <div class="mood-category">
+                        <p class="mood-category-label">{{ category }}</p>
+                        <div class="mood-tag-group">
+                            {% for tag in tags %}
+                            <button class="btn-mood-tag {% if tag.id in user_mood_ids %}mood-active{% endif %}"
+                                data-album-id="{{ album.id }}" data-tag-id="{{ tag.id }}"
+                                data-tag-name="{{ tag.name }}">
+                                {{ tag.name }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# ── Private notes ── #}
+            <div class="sidebar-card">
+                <h3 class="sidebar-card-title">Your Notes</h3>
+                <p class="sidebar-card-sub">Private — only you can see this.</p>
+
+                <form id="notesForm">
+                    <textarea id="notesInput" name="notes" class="notes-input" rows="5"
+                        placeholder="Write something about this album..."
+                        maxlength="2000">{{ user_notes or '' }}</textarea>
+                    <button type="submit" class="btn-save-notes" id="btnSaveNotes">
+                        Save note
+                    </button>
+                    <span class="notes-status" id="notesStatus"></span>
+                </form>
+            </div>
+
+        </aside>
+
+    </div>
+
+    {# ── Toast ── #}
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+
+    {# ══════════════════════════════════════════════════════════════════════════
+    COMMENT MACRO
+    A Jinja2 macro is a reusable template function.
+    This one renders a single comment and recursively renders its replies.
+
+    Parameters:
+    comment — Comment object
+    user_votes — dict of { comment_id: vote_value }
+    album_id — int
+    depth — how deep this comment is nested (0 = top-level)
+    We stop indenting visually after depth 3 to keep it readable.
+    ══════════════════════════════════════════════════════════════════════════ #}
+    {% macro render_comment(comment, user_votes, album_id, depth) %}
+
+    {#
+    Sort the replies:
+    1. Any reply with score >= 20 is "pinned" and always shown first, in score order.
+    2. The remaining replies are sorted by score descending.
+    3. Of the remaining, the top 4 are shown by default.
+    4. Beyond 4, replies are shown in chronological order and collapsed.
+
+    We do the sorting and splitting here in the template using Jinja2 filters.
+    #}
+
+    {# Separate pinned (score >= 20) from the rest #}
+    {% set pinned_replies = comment.replies | selectattr('score', 'ge', 20) | sort(attribute='score', reverse=true) |
+    list %}
+    {% set normal_replies = comment.replies | rejectattr('score', 'ge', 20) | sort(attribute='score', reverse=true) |
+    list %}
+
+    {# Of the normal replies, show the top 4, collapse the rest #}
+    {% set visible_normal = normal_replies[:4] %}
+    {% set overflow_normal = normal_replies[4:] | sort(attribute='created_at') | list %}
+
+    <div class="comment-block {% if depth > 0 %}comment-reply{% endif %}" id="comment-{{ comment.id }}"
+        data-depth="{{ [depth, 3] | min }}">
+        <div class="comment-inner">
+
+            {# Comment header — author and timestamp #}
+            <div class="comment-header">
+                <span class="comment-author">{{ comment.author.username }}</span>
+                <span class="comment-time">{{ comment.created_at.strftime('%b %d, %Y') }}</span>
+            </div>
+
+            {# Comment body #}
+            <p class="comment-body">{{ comment.content }}</p>
+
+            {# Comment footer — vote buttons and reply button #}
+            <div class="comment-footer">
+
+                {# Upvote button #}
+                <button class="btn-vote btn-upvote {% if user_votes.get(comment.id) == 1 %}vote-active-up{% endif %}"
+                    data-comment-id="{{ comment.id }}" data-value="1" aria-label="Upvote">
+                    &#9650;
+                </button>
+
+                {# Score display — updates via JavaScript #}
+                <span
+                    class="vote-score {% if comment.score > 0 %}score-positive{% elif comment.score < 0 %}score-negative{% endif %}"
+                    id="score-{{ comment.id }}">
+                    {{ comment.score }}
+                </span>
+
+                {# Downvote button #}
+                <button
+                    class="btn-vote btn-downvote {% if user_votes.get(comment.id) == -1 %}vote-active-down{% endif %}"
+                    data-comment-id="{{ comment.id }}" data-value="-1" aria-label="Downvote">
+                    &#9660;
+                </button>
+
+                {# Reply button — reveals the reply form inline #}
+                <button class="btn-reply-toggle" data-comment-id="{{ comment.id }}">
+                    Reply
+                </button>
+
+            </div>
+
+            {# Inline reply form — hidden by default, revealed by the Reply button #}
+            <div class="reply-form-wrap" id="reply-form-{{ comment.id }}">
+                <form method="POST" action="{{ url_for('post_comment') }}" class="comment-form reply-form">
+                    <input type="hidden" name="album_id" value="{{ album_id }}">
+                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                    <textarea name="content" class="comment-input" rows="2" placeholder="Write a reply..."
+                        maxlength="2000" required></textarea>
+                    <div class="comment-form-actions">
+                        <button type="submit" class="btn-post-comment">Post reply</button>
+                        <button type="button" class="btn-cancel-reply" data-comment-id="{{ comment.id }}">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        {# ── Replies ── #}
+        {% if comment.replies %}
+        <div class="replies-wrap">
+
+            {# Always-visible: pinned replies first, then top 4 normal #}
+            {% for reply in pinned_replies %}
+            {{ render_comment(reply, user_votes, album_id, depth + 1) }}
+            {% endfor %}
+
+            {% for reply in visible_normal %}
+            {{ render_comment(reply, user_votes, album_id, depth + 1) }}
+            {% endfor %}
+
+            {# Collapsed overflow replies — shown in chronological order #}
+            {% if overflow_normal %}
+            <div class="overflow-replies" id="overflow-{{ comment.id }}">
+                {% for reply in overflow_normal %}
+                {{ render_comment(reply, user_votes, album_id, depth + 1) }}
+                {% endfor %}
+            </div>
+
+            <button class="btn-show-more" id="show-more-{{ comment.id }}" data-target="overflow-{{ comment.id }}">
+                Show {{ overflow_normal | length }} more
+                {{ 'reply' if overflow_normal | length == 1 else 'replies' }}
+            </button>
+            {% endif %}
+
+        </div>
+        {% endif %}
+
+    </div>
+    {% endmacro %}
+
+
+    {# ══════════════════════════════════════════════════════════════════════════
+    JAVASCRIPT
+    ══════════════════════════════════════════════════════════════════════════ #}
+    <script>
+        // -----------------------------------------------------------------------
+        // Rating — Like / Dislike
+        // -----------------------------------------------------------------------
+        document.querySelectorAll('.btn-rate').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                let albumId = btn.getAttribute('data-album-id');
+                let rating = btn.getAttribute('data-rating');
+
+                let formData = new FormData();
+                formData.append('album_id', albumId);
+                formData.append('rating', rating);
+
+                fetch('{{ url_for("rate_album") }}', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        // Update button active states
+                        let likeBtn = document.getElementById('btnLike');
+                        let dislikeBtn = document.getElementById('btnDislike');
+
+                        likeBtn.classList.remove('active');
+                        dislikeBtn.classList.remove('active');
+
+                        if (data.rating === 1) likeBtn.classList.add('active');
+                        else if (data.rating === -1) dislikeBtn.classList.add('active');
+
+                        // Toast feedback
+                        if (data.status === 'removed') showToast('Rating removed');
+                        else if (data.rating === 1) showToast('Liked');
+                        else showToast('Disliked');
+                    })
+                    .catch(function () {
+                        showToast('Something went wrong. Please try again.');
+                    });
+            });
+        });
+
+        // -----------------------------------------------------------------------
+        // Mood tags
+        // Each tag button toggles on/off.
+        // If the user has 3 tags applied, new ones are blocked until one is removed.
+        // -----------------------------------------------------------------------
+        let userMoodIds = JSON.parse('{{ user_mood_ids | tojson | safe }}');   // list of tag ids already applied
+
+        document.querySelectorAll('.btn-mood-tag').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                let albumId = btn.getAttribute('data-album-id');
+                let tagId = parseInt(btn.getAttribute('data-tag-id'));
+                let tagName = btn.getAttribute('data-tag-name');
+                let isActive = btn.classList.contains('mood-active');
+
+                // If not active and already at 3 tags, block
+                if (!isActive && userMoodIds.length >= 3) {
+                    showToast('Limit of 3 mood tags reached. Remove one first.');
+                    return;
+                }
+
+                let formData = new FormData();
+                formData.append('album_id', albumId);
+                formData.append('mood_tag_id', tagId);
+
+                fetch('{{ url_for("tag_mood") }}', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data.status === 'added') {
+                            btn.classList.add('mood-active');
+                            userMoodIds.push(tagId);
+                            showToast(tagName + ' added');
+                        } else if (data.status === 'removed') {
+                            btn.classList.remove('mood-active');
+                            userMoodIds = userMoodIds.filter(function (id) { return id !== tagId; });
+                            showToast(tagName + ' removed');
+                        } else if (data.status === 'limit_reached') {
+                            showToast('Limit of 3 mood tags reached. Remove one first.');
+                            return;
+                        }
+
+                        // Update the remaining counter
+                        let remaining = 3 - userMoodIds.length;
+                        document.getElementById('moodLimitNote').textContent =
+                            remaining + ' of 3 remaining';
+                    })
+                    .catch(function () {
+                        showToast('Something went wrong. Please try again.');
+                    });
+            });
+        });
+
+        // -----------------------------------------------------------------------
+        // Private notes — save on button click
+        // -----------------------------------------------------------------------
+        document.getElementById('notesForm').addEventListener('submit', function (e) {
+            e.preventDefault();   // stop the page from reloading
+
+            let notes = document.getElementById('notesInput').value;
+            let statusEl = document.getElementById('notesStatus');
+            let albumId = parseInt('{{ album.id }}');
+
+            let formData = new FormData();
+            formData.append('album_id', albumId);
+            formData.append('notes', notes);
+
+            statusEl.textContent = 'Saving...';
+            statusEl.className = 'notes-status';
+
+            fetch('{{ url_for("save_note") }}', {
+                method: 'POST',
+                body: formData
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.status === 'ok') {
+                        statusEl.textContent = 'Saved';
+                        statusEl.className = 'notes-status notes-saved';
+                        // Fade the status out after 2 seconds
+                        setTimeout(function () {
+                            statusEl.textContent = '';
+                            statusEl.className = 'notes-status';
+                        }, 2000);
+                    }
+                })
+                .catch(function () {
+                    statusEl.textContent = 'Could not save';
+                    statusEl.className = 'notes-status notes-error';
+                });
+        });
+
+        // -----------------------------------------------------------------------
+        // Comment votes
+        // -----------------------------------------------------------------------
+        document.addEventListener('click', function (e) {
+            let btn = e.target.closest('.btn-vote');
+            if (!btn) return;
+
+            let commentId = btn.getAttribute('data-comment-id');
+            let value = btn.getAttribute('data-value');
+
+            let formData = new FormData();
+            formData.append('comment_id', commentId);
+            formData.append('value', value);
+
+            fetch('{{ url_for("vote_comment") }}', {
+                method: 'POST',
+                body: formData
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    // Update the score display
+                    let scoreEl = document.getElementById('score-' + commentId);
+                    if (scoreEl) {
+                        scoreEl.textContent = data.score;
+                        scoreEl.className = 'vote-score';
+                        if (data.score > 0) scoreEl.classList.add('score-positive');
+                        else if (data.score < 0) scoreEl.classList.add('score-negative');
+                    }
+
+                    // Update the button active states for this comment
+                    let commentEl = document.getElementById('comment-' + commentId);
+                    if (!commentEl) return;
+
+                    let upBtn = commentEl.querySelector('.btn-upvote');
+                    let downBtn = commentEl.querySelector('.btn-downvote');
+
+                    upBtn.classList.remove('vote-active-up');
+                    downBtn.classList.remove('vote-active-down');
+
+                    if (data.status !== 'removed') {
+                        if (value === '1') upBtn.classList.add('vote-active-up');
+                        else downBtn.classList.add('vote-active-down');
+                    }
+                })
+                .catch(function () {
+                    showToast('Something went wrong. Please try again.');
+                });
+        });
+
+        // -----------------------------------------------------------------------
+        // Reply form toggle
+        // -----------------------------------------------------------------------
+
+        // Show the inline reply form when "Reply" is clicked
+        document.addEventListener('click', function (e) {
+            let btn = e.target.closest('.btn-reply-toggle');
+            if (!btn) return;
+
+            let commentId = btn.getAttribute('data-comment-id');
+            let formWrap = document.getElementById('reply-form-' + commentId);
+            if (!formWrap) return;
+
+            // Close any other open reply forms first
+            document.querySelectorAll('.reply-form-wrap.open').forEach(function (el) {
+                if (el !== formWrap) el.classList.remove('open');
+            });
+
+            formWrap.classList.toggle('open');
+
+            if (formWrap.classList.contains('open')) {
+                formWrap.querySelector('textarea').focus();
+            }
+        });
+
+        // Cancel button closes the reply form
+        document.addEventListener('click', function (e) {
+            let btn = e.target.closest('.btn-cancel-reply');
+            if (!btn) return;
+
+            let commentId = btn.getAttribute('data-comment-id');
+            let formWrap = document.getElementById('reply-form-' + commentId);
+            if (formWrap) formWrap.classList.remove('open');
+        });
+
+        // -----------------------------------------------------------------------
+        // Show more replies
+        // -----------------------------------------------------------------------
+        document.addEventListener('click', function (e) {
+            let btn = e.target.closest('.btn-show-more');
+            if (!btn) return;
+
+            let targetId = btn.getAttribute('data-target');
+            let targetEl = document.getElementById(targetId);
+            if (!targetEl) return;
+
+            targetEl.classList.add('expanded');
+            btn.style.display = 'none';
+        });
+
+        // -----------------------------------------------------------------------
+        // Toast
+        // -----------------------------------------------------------------------
+        function showToast(message) {
+            let toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(function () { toast.classList.remove('show'); }, 2500);
+        }
+    </script>
+
+</body>
+
+</html>

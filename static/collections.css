@@ -1,0 +1,476 @@
+/* =============================================================================
+   collections.css
+   Styles for the collections list, create collection, and view collection pages.
+   Shared styles come from global.css — this file adds only what is unique
+   to these pages.
+============================================================================= */
+
+@import url('global.css');
+
+/* ── Active nav link ── */
+
+.nav-active {
+    border-bottom: 2px solid #fff;
+    padding-bottom: 2px;
+}
+
+/* ── Page header ── */
+/* Used on both the collections list and the view collection page */
+
+.page-header {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: 1.75rem 2rem;
+}
+
+.page-header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.page-header-left h1 {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    color: var(--color-text);
+    margin-bottom: 0.25rem;
+}
+
+.page-header-left p,
+.page-header-meta {
+    font-size: 0.875rem;
+    color: var(--color-muted);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* ── View collection header extras ── */
+
+.collection-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.3rem;
+}
+
+.collection-desc {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    margin-bottom: 0.4rem;
+    max-width: 600px;
+    line-height: 1.6;
+}
+
+/* ── Main section ── */
+
+.collections-section {
+    padding: 1.5rem 2rem 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ── Collections grid ── */
+
+.collections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* ── Collection card ── */
+
+.collection-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.collection-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glow);
+}
+
+.card-top {
+    padding: 1.1rem 1.1rem 0.75rem;
+}
+
+.card-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.3rem;
+}
+
+.card-name {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.card-description {
+    font-size: 0.82rem;
+    color: var(--color-muted);
+    line-height: 1.5;
+    margin-bottom: 0.4rem;
+
+    /* Clamp to two lines with an ellipsis */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-meta {
+    font-size: 0.78rem;
+    color: var(--color-muted);
+}
+
+/* ── Public / Private badge ── */
+
+.status-badge {
+    display: inline-block;
+    padding: 0.18rem 0.55rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.badge-public {
+    background: #1a2a3d;
+    color: var(--color-info);
+}
+
+.badge-private {
+    background: var(--color-surface-2);
+    color: var(--color-muted);
+}
+
+/* ── Cover strip ── */
+/* Four album covers shown as a preview at the bottom of the card */
+
+.cover-strip {
+    display: flex;
+    flex: 1;
+}
+
+.cover-thumb {
+    flex: 1;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+}
+
+.cover-thumb-empty {
+    background: var(--color-surface-2);
+}
+
+/* ── Card action buttons ── */
+
+.card-actions {
+    display: flex;
+    gap: 0;
+    border-top: 1px solid var(--color-border);
+}
+
+.card-actions button,
+.card-actions a {
+    flex: 1;
+    padding: 0.6rem 0;
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+    color: var(--color-muted);
+    border-right: 1px solid var(--color-border);
+}
+
+.card-actions button:last-child,
+.card-actions a:last-child {
+    border-right: none;
+}
+
+.btn-view:hover {
+    background: var(--color-surface-2);
+    color: var(--color-text);
+}
+
+.btn-edit:hover {
+    background: var(--color-surface-2);
+    color: var(--color-text);
+}
+
+.btn-delete:hover {
+    background: #3d1a1a;
+    color: var(--color-dislike);
+}
+
+/* ── Edit and Delete modals ── */
+
+.edit-modal-box {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    width: 420px;
+    max-width: 95vw;
+    box-shadow: var(--shadow-modal);
+    animation: modalIn 0.2s ease;
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.modal-header h3 {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    color: var(--color-text);
+}
+
+.btn-modal-close {
+    background: none;
+    border: none;
+    color: var(--color-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition), color var(--transition);
+}
+
+.btn-modal-close:hover {
+    background: var(--color-surface-2);
+    color: var(--color-text);
+}
+
+/* ── Edit form inside modal and on create page ── */
+
+.edit-form {
+    padding: 1.25rem;
+}
+
+.form-group {
+    margin-bottom: 1.1rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 0.4rem;
+}
+
+.label-optional {
+    font-weight: 400;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    font-family: var(--font-body);
+    outline: none;
+    transition: border-color var(--transition);
+}
+
+.form-input:focus {
+    border-color: var(--color-accent);
+}
+
+.form-input::placeholder {
+    color: var(--color-muted);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+}
+
+/* Inline checkbox row */
+.form-group-inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.form-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--color-accent);
+    flex-shrink: 0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.65rem;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+}
+
+/* Delete confirmation text */
+.delete-warning {
+    padding: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    line-height: 1.6;
+}
+
+.delete-warning strong {
+    color: var(--color-text);
+}
+
+/* Delete confirm button */
+.btn-danger {
+    padding: 0.65rem 1.5rem;
+    background: #3d1a1a;
+    color: var(--color-dislike);
+    border: 1px solid var(--color-dislike);
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background var(--transition);
+}
+
+.btn-danger:hover {
+    background: var(--color-dislike);
+    color: #fff;
+}
+
+/* ── Create collection card ── */
+
+.create-card {
+    max-width: 520px;
+    margin: 0 auto;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+/* ── Rating buttons on album cards (view collection page) ── */
+
+.rating-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 0.6rem;
+}
+
+.btn-rate {
+    flex: 1;
+    padding: 0.38rem 0.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.btn-rate:hover {
+    border-color: var(--color-text);
+    color: var(--color-text);
+}
+
+.btn-like.active {
+    background: #1a3d28;
+    border-color: var(--color-like);
+    color: var(--color-like);
+}
+
+.btn-dislike.active {
+    background: #3d1a1a;
+    border-color: var(--color-dislike);
+    color: var(--color-dislike);
+}
+
+.rating-readonly {
+    margin-top: 0.5rem;
+    min-height: 1.4em;
+}
+
+.rating-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.rating-liked {
+    background: #1a3d28;
+    color: var(--color-like);
+}
+
+.rating-disliked {
+    background: #3d1a1a;
+    color: var(--color-dislike);
+}
+
+.artist-link {
+    transition: color var(--transition);
+}
+
+.artist-link:hover {
+    color: var(--color-accent);
+}
+
+.release-year {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    margin-bottom: 0.25rem;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 600px) {
+    .page-header-inner {
+        flex-direction: column;
+    }
+
+    .collections-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .edit-modal-box {
+        width: 95vw;
+    }
+}

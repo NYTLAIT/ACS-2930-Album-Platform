@@ -1,0 +1,92 @@
+{# templates/create_collection.html #}
+{#
+Create a new collection.
+No variables passed — just a simple form that POSTs to /create_collection.
+#}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Collection | AlbumRank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='collections.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <nav class="nav-bar">
+        <div class="logo">AlbumRank</div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('collections') }}" class="nav-active">Collections</a>
+            <a href="{{ url_for('search') }}">Search</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
+        </div>
+    </nav>
+
+    {# -- Back navigation -- #}
+    <div class="back-bar">
+        <div class="back-bar-inner">
+            <a href="{{ url_for('collections') }}" class="back-link">&#8592; Collections</a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <section class="page-header">
+        <div class="page-header-inner">
+            <div class="page-header-left">
+                <h1>New Collection</h1>
+                <p>Organise your albums into a curated collection.</p>
+            </div>
+            <a href="{{ url_for('collections') }}" class="back-link">Back to Collections</a>
+        </div>
+    </section>
+
+    <section class="collections-section">
+        <div class="create-card">
+            <form method="POST" class="edit-form">
+
+                <div class="form-group">
+                    <label class="form-label" for="name">Name</label>
+                    <input type="text" id="name" name="name" class="form-input" placeholder="e.g. Late Night Listens"
+                        maxlength="255" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="description">
+                        Description <span class="label-optional">(optional)</span>
+                    </label>
+                    <textarea id="description" name="description" class="form-input form-textarea" rows="3"
+                        placeholder="What is this collection about?" maxlength="500"></textarea>
+                </div>
+
+                <div class="form-group form-group-inline">
+                    <label class="form-label" for="is_public">Make this collection public</label>
+                    <input type="checkbox" id="is_public" name="is_public" class="form-checkbox">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Create Collection</button>
+                    <a href="{{ url_for('collections') }}" class="btn-ghost">Cancel</a>
+                </div>
+
+            </form>
+        </div>
+    </section>
+
+</body>
+
+</html>

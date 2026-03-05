@@ -1,0 +1,465 @@
+{# templates/search_results.html #}
+{#
+Search results page.
+Variables passed from the search route in ecouter.py:
+albums — list of dicts from Spotify, each with:
+spotify_id, name, artist, artist_id,
+release_date, image_url,
+local_id (int or None — our db id if we have it),
+user_rating (1, -1, or None)
+query — the search string the user typed
+collections — list of Playlist objects for the current user
+(used to populate the Add to Collection modal)
+#}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search | AlbumRank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='search.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    {# ── Navigation ── #}
+    <nav class="nav-bar">
+        <div class="logo">AlbumRank</div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('collections') }}">Collections</a>
+            <a href="{{ url_for('search') }}" class="nav-active">Search</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
+        </div>
+    </nav>
+
+
+    {# -- Back navigation -- #}
+    <div class="back-bar">
+        <div class="back-bar-inner">
+            <a href="{{ url_for('dashboard') }}" class="back-link">&#8592; Dashboard</a>
+        </div>
+    </div>
+
+    {# ── Flash messages ── #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {# ── Search header ── #}
+    <section class="search-header">
+        <div class="search-header-inner">
+            <h1>Search Albums</h1>
+
+            {# Search bar pre-filled with the current query #}
+            <form method="GET" action="{{ url_for('search') }}" class="search-form">
+                <input type="text" name="query" class="search-input" placeholder="Search by album, artist, or genre..."
+                    value="{{ query }}" required>
+                <button type="submit" class="search-btn">Search</button>
+            </form>
+
+            {% if query %}
+            <p class="results-label">
+                Results for <strong>"{{ query }}"</strong>
+                &mdash; {{ albums | length }} found
+            </p>
+            {% endif %}
+        </div>
+    </section>
+
+    {# ── Results grid ── #}
+    <section class="results-section">
+
+        {% if albums %}
+        <div class="albums-grid">
+            {% for album in albums %}
+            <div class="album-card" id="search-card-{{ album.spotify_id }}">
+
+                {# Cover image #}
+                {#
+                If this album is in our database (local_id is set),
+                link to the detail page. Otherwise just show the image.
+                #}
+                {% if album.image_url %}
+                {% if album.local_id %}
+                <a href="{{ url_for('album_detail', album_id=album.local_id) }}">
+                    <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-image">
+                </a>
+                {% else %}
+                <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-image">
+                {% endif %}
+                {% else %}
+                <div class="album-placeholder">No cover</div>
+                {% endif %}
+
+                <div class="album-info">
+
+                    {# Album title #}
+                    {% if album.local_id %}
+                    <h3 class="album-name">
+                        <a href="{{ url_for('album_detail', album_id=album.local_id) }}">
+                            {{ album.name }}
+                        </a>
+                    </h3>
+                    {% else %}
+                    <h3 class="album-name">{{ album.name }}</h3>
+                    {% endif %}
+
+                    {# Artist name — clickable to artist page #}
+                    {% if album.artist_id %}
+                    <p class="album-artist">
+                        <a href="{{ url_for('artist_page', spotify_artist_id=album.artist_id) }}" class="artist-link">
+                            {{ album.artist }}
+                        </a>
+                    </p>
+                    {% else %}
+                    <p class="album-artist">{{ album.artist }}</p>
+                    {% endif %}
+
+                    {# Release year #}
+                    {% if album.release_date %}
+                    <p class="release-year">{{ album.release_date[:4] }}</p>
+                    {% endif %}
+
+                    {# Rating state — shown if the user has already rated this album #}
+                    <div class="card-rating-state" id="rating-state-{{ album.spotify_id }}">
+                        {% if album.user_rating == 1 %}
+                        <span class="rating-badge rating-liked">Liked</span>
+                        {% elif album.user_rating == -1 %}
+                        <span class="rating-badge rating-disliked">Disliked</span>
+                        {% else %}
+                        <span class="rating-badge rating-unrated">Not rated</span>
+                        {% endif %}
+                    </div>
+
+                    {#
+                    Add to Collection button.
+                    All album data is stored in data- attributes so JavaScript
+                    can read them without any quoting issues.
+                    #}
+                    <button class="btn-add-to-collection" data-spotify-id="{{ album.spotify_id }}"
+                        data-name="{{ album.name | e }}" data-artist="{{ album.artist | e }}"
+                        data-artist-id="{{ album.artist_id }}" data-release-date="{{ album.release_date }}"
+                        data-image-url="{{ album.image_url or '' }}" id="add-btn-{{ album.spotify_id }}">
+                        Add to Collection
+                    </button>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% elif query %}
+        {# Query was submitted but nothing came back #}
+        <div class="no-results">
+            <h2>No albums found</h2>
+            <p>Try a different search term.</p>
+        </div>
+
+        {% else %}
+        {# Page loaded with no query — prompt the user to search #}
+        <div class="no-results">
+            <h2>Search for an album</h2>
+            <p>Type an album name, artist, or genre in the search bar above.</p>
+        </div>
+        {% endif %}
+
+    </section>
+
+
+    {# ── Add to Collection modal ── #}
+    {#
+    Hidden by default. Shown when the user clicks an "Add to Collection" button.
+    JavaScript populates the album strip and handles the collection list clicks.
+    #}
+    <div class="modal-overlay" id="collectionModal" role="dialog" aria-modal="true" aria-label="Add to collection">
+
+        <div class="collection-modal-box">
+
+            {# Modal header #}
+            <div class="col-modal-header">
+                <h3>Add to Collection</h3>
+                <button class="btn-modal-close" id="btnCloseModal" aria-label="Close">&#x2715;</button>
+            </div>
+
+            {# Album strip — shows which album is being added #}
+            <div class="col-modal-album-strip">
+                <div id="modalAlbumArt"></div>
+                <div class="strip-meta">
+                    <strong id="modalAlbumName"></strong>
+                    <span id="modalAlbumArtist"></span>
+                </div>
+            </div>
+
+            {# Scrollable list of the user's collections #}
+            <div class="col-modal-list" id="collectionList">
+                {% if collections %}
+                {% for col in collections %}
+                <div class="col-modal-item" id="col-item-{{ col.id }}" data-collection-id="{{ col.id }}"
+                    data-collection-name="{{ col.name | e }}" role="button" tabindex="0">
+                    <div class="col-item-icon" id="col-icon-{{ col.id }}">+</div>
+                    <div>
+                        <div class="col-item-name">{{ col.name }}</div>
+                        <div class="col-item-count">
+                            {{ col.albums | length }}
+                            {{ 'album' if col.albums | length == 1 else 'albums' }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="no-collections-msg">
+                    You have no collections yet. Create one below.
+                </p>
+                {% endif %}
+            </div>
+
+            {# Footer — create a new collection inline #}
+            <div class="col-modal-footer">
+                <button class="btn-new-col" id="btnToggleNewCol">
+                    New Collection
+                </button>
+
+                <div class="new-col-form" id="newColForm">
+                    <input type="text" id="newColName" placeholder="Collection name" maxlength="255">
+                    <button class="btn-col-create" id="btnCreateCol">
+                        Create and add
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {# ── Toast ── #}
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+
+    {# ── JavaScript ── #}
+    <script>
+        // -----------------------------------------------------------------------
+        // State
+        // Holds the album data for whichever card opened the modal.
+        // -----------------------------------------------------------------------
+        let pendingAlbum = {};
+
+        // -----------------------------------------------------------------------
+        // Open the modal when "Add to Collection" is clicked
+        // -----------------------------------------------------------------------
+        document.querySelectorAll('.btn-add-to-collection').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                // Read album data from data- attributes — no quoting issues
+                pendingAlbum = {
+                    spotifyId: btn.getAttribute('data-spotify-id'),
+                    name: btn.getAttribute('data-name'),
+                    artist: btn.getAttribute('data-artist'),
+                    artistId: btn.getAttribute('data-artist-id'),
+                    releaseDate: btn.getAttribute('data-release-date'),
+                    imageUrl: btn.getAttribute('data-image-url')
+                };
+
+                // Populate the album strip inside the modal
+                document.getElementById('modalAlbumName').textContent = pendingAlbum.name;
+                document.getElementById('modalAlbumArtist').textContent = pendingAlbum.artist;
+
+                let artEl = document.getElementById('modalAlbumArt');
+                if (pendingAlbum.imageUrl) {
+                    artEl.innerHTML = '<img src="' + pendingAlbum.imageUrl + '" alt="' + pendingAlbum.name + '">';
+                } else {
+                    artEl.innerHTML = '<div class="strip-placeholder">No cover</div>';
+                }
+
+                // Reset any previous added states on the collection items
+                document.querySelectorAll('.col-modal-item').forEach(function (item) {
+                    item.classList.remove('added');
+                    let icon = item.querySelector('.col-item-icon');
+                    if (icon) icon.textContent = '+';
+                });
+
+                // Hide the new collection form
+                document.getElementById('newColForm').classList.remove('visible');
+                document.getElementById('newColName').value = '';
+
+                // Show the modal
+                document.getElementById('collectionModal').classList.add('active');
+            });
+        });
+
+        // -----------------------------------------------------------------------
+        // Close the modal
+        // -----------------------------------------------------------------------
+        document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+
+        // Close when clicking the dark overlay behind the modal
+        document.getElementById('collectionModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        function closeModal() {
+            document.getElementById('collectionModal').classList.remove('active');
+            pendingAlbum = {};
+        }
+
+        // -----------------------------------------------------------------------
+        // Add to an existing collection when a collection item is clicked
+        // -----------------------------------------------------------------------
+        document.getElementById('collectionList').addEventListener('click', function (e) {
+            // Walk up the DOM to find the collection item that was clicked
+            let item = e.target.closest('.col-modal-item');
+            if (!item) return;
+
+            let collectionId = item.getAttribute('data-collection-id');
+            let collectionName = item.getAttribute('data-collection-name');
+            addToCollection(collectionId, collectionName, item);
+        });
+
+        // Also handle keyboard activation on collection items
+        document.getElementById('collectionList').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                let item = e.target.closest('.col-modal-item');
+                if (!item) return;
+                let collectionId = item.getAttribute('data-collection-id');
+                let collectionName = item.getAttribute('data-collection-name');
+                addToCollection(collectionId, collectionName, item);
+            }
+        });
+
+        function addToCollection(collectionId, collectionName, itemEl) {
+            let formData = new FormData();
+            formData.append('spotify_id', pendingAlbum.spotifyId);
+            formData.append('name', pendingAlbum.name);
+            formData.append('artist', pendingAlbum.artist);
+            formData.append('artist_id', pendingAlbum.artistId);
+            formData.append('release_date', pendingAlbum.releaseDate);
+            formData.append('image_url', pendingAlbum.imageUrl);
+            formData.append('collection_id', collectionId);
+
+            fetch('{{ url_for("add_to_collection") }}', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            })
+                .then(function (response) { return response.json(); })
+                .then(function (data) {
+                    if (data.status === 'added' || data.status === 'exists') {
+                        // Show a checkmark on the collection item
+                        if (itemEl) {
+                            itemEl.classList.add('added');
+                            let icon = itemEl.querySelector('.col-item-icon');
+                            if (icon) icon.textContent = '\u2713';
+                        }
+
+                        showToast(data.message);
+
+                        // Close the modal after a short delay
+                        setTimeout(closeModal, 1000);
+                    }
+                })
+                .catch(function () {
+                    showToast('Something went wrong. Please try again.');
+                });
+        }
+
+        // -----------------------------------------------------------------------
+        // Toggle the new collection form
+        // -----------------------------------------------------------------------
+        document.getElementById('btnToggleNewCol').addEventListener('click', function () {
+            let form = document.getElementById('newColForm');
+            form.classList.toggle('visible');
+            if (form.classList.contains('visible')) {
+                document.getElementById('newColName').focus();
+            }
+        });
+
+        // -----------------------------------------------------------------------
+        // Create a new collection and immediately add the album to it
+        // -----------------------------------------------------------------------
+        document.getElementById('btnCreateCol').addEventListener('click', function () {
+            let name = document.getElementById('newColName').value.trim();
+            if (!name) return;
+
+            let formData = new FormData();
+            formData.append('name', name);
+
+            fetch('{{ url_for("create_collection") }}', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            })
+                .then(function (response) { return response.json(); })
+                .then(function (newCol) {
+                    if (newCol.error) {
+                        showToast(newCol.error);
+                        return;
+                    }
+
+                    // Add the new collection to the list in the modal
+                    let list = document.getElementById('collectionList');
+                    let noMsg = list.querySelector('.no-collections-msg');
+                    if (noMsg) noMsg.remove();
+
+                    let newItem = document.createElement('div');
+                    newItem.className = 'col-modal-item';
+                    newItem.id = 'col-item-' + newCol.id;
+                    newItem.setAttribute('data-collection-id', newCol.id);
+                    newItem.setAttribute('data-collection-name', newCol.name);
+                    newItem.setAttribute('role', 'button');
+                    newItem.setAttribute('tabindex', '0');
+                    newItem.innerHTML =
+                        '<div class="col-item-icon" id="col-icon-' + newCol.id + '">+</div>' +
+                        '<div>' +
+                        '<div class="col-item-name">' + newCol.name + '</div>' +
+                        '<div class="col-item-count">0 albums</div>' +
+                        '</div>';
+                    list.appendChild(newItem);
+
+                    // Immediately add the album to the new collection
+                    addToCollection(newCol.id, newCol.name, newItem);
+                })
+                .catch(function () {
+                    showToast('Could not create collection. Please try again.');
+                });
+        });
+
+        // Also allow pressing Enter in the name input to trigger create
+        document.getElementById('newColName').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('btnCreateCol').click();
+            }
+        });
+
+        // -----------------------------------------------------------------------
+        // Toast
+        // -----------------------------------------------------------------------
+        function showToast(message) {
+            let toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(function () {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+    </script>
+
+</body>
+
+</html>

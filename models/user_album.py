@@ -1,38 +1,45 @@
-#  -1  = Dislike
-#   None = not yet rated
-#
-# To change to a 5-star system later, just change the rating column
-# to allow values 1–5 and update the UI. Nothing else needs to change.
+"""
+models/user_album.py
 
+UserAlbum is the join between a User and an Album that carries data:
+  - rating        : 1 (like) or -1 (dislike) or None (not rated)
+  - notes         : private text only visible to the owner
+  - last_viewed_at: stamped every time the user visits the album detail page
+                    used by the dashboard recent activity section
+
+One user can only have one UserAlbum per album (UniqueConstraint).
+
+RATING_LIKE and RATING_DISLIKE are the only valid non-null rating values.
+"""
 from datetime import datetime
 from .database import db
 
-# These are the only valid rating values.
-# Changing this is the only thing you need to do to update the rating system.
 RATING_LIKE    =  1
 RATING_DISLIKE = -1
 
 
 class UserAlbum(db.Model):
-    __tablename__ = 'user_albums'
+    __tablename__ = "user_albums"
 
-    id         = db.Column(db.Integer, primary_key=True)
-    user_id    = db.Column(db.Integer, db.ForeignKey('users.id'),  nullable=False)
-    album_id   = db.Column(db.Integer, db.ForeignKey('albums.id'), nullable=False)
+    id             = db.Column(db.Integer,  primary_key=True)
+    user_id        = db.Column(db.Integer,  db.ForeignKey("users.id",  ondelete="CASCADE"),
+                               nullable=False, index=True)
+    album_id       = db.Column(db.Integer,  db.ForeignKey("albums.id", ondelete="CASCADE"),
+                               nullable=False, index=True)
+    rating         = db.Column(db.Integer,  nullable=True)   # 1, -1, or None
+    notes          = db.Column(db.Text,     nullable=True)   # private to this user
+    created_at     = db.Column(db.DateTime, default=datetime.utcnow,  nullable=False)
+    updated_at     = db.Column(db.DateTime, default=datetime.utcnow,
+                               onupdate=datetime.utcnow, nullable=False)
+    last_viewed_at = db.Column(db.DateTime, nullable=True)
 
-    # Rating: 1 = Like, -1 = Dislike, None = not rated yet
-    rating     = db.Column(db.Integer, nullable=True)
-
-    # Personal note — only visible to this user
-    notes      = db.Column(db.Text, nullable=True)
-
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Make sure one user can only have one entry per album
     __table_args__ = (
-        db.UniqueConstraint('user_id', 'album_id', name='unique_user_album'),
+        db.UniqueConstraint("user_id", "album_id", name="uq_user_album"),
     )
 
-    def __repr__(self):
-        return f'<UserAlbum user={self.user_id} album={self.album_id} rating={self.rating}>'
+    # Relationships
+    user  = db.relationship("User",  back_populates="user_albums")
+    album = db.relationship("Album", back_populates="user_albums")
+
+    def __repr__(self) -> str:
+        return f"<UserAlbum user={self.user_id} album={self.album_id} rating={self.rating}>"

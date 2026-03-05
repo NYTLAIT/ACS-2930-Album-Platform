@@ -1,0 +1,302 @@
+/* =============================================================================
+   artist.css
+   Styles for the artist page.
+   Shared components come from global.css.
+============================================================================= */
+
+@import url('global.css');
+
+/* ── Artist hero ── */
+
+.artist-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 3rem 2rem 2.5rem;
+    min-height: 280px;
+    display: flex;
+    align-items: flex-end;
+}
+
+/*
+    The background is the artist photo blurred and darkened.
+    It sits behind everything else via z-index.
+*/
+.artist-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center top;
+    filter: blur(28px) brightness(0.3);
+    transform: scale(1.08);
+    /* hides the blur edges */
+    z-index: 0;
+}
+
+.artist-hero-inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+/* ── Artist photo ── */
+
+.artist-photo-wrap {
+    flex-shrink: 0;
+}
+
+.artist-photo {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    display: block;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+}
+
+.artist-photo-empty {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: var(--color-surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Artist info ── */
+
+.artist-info {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: 0.25rem;
+}
+
+.artist-type-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #fff;
+    opacity: 0.7;
+    margin-bottom: 0.35rem;
+}
+
+.artist-name {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+
+    /* Prevent very long names from overflowing */
+    word-break: break-word;
+}
+
+.artist-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+}
+
+.artist-followers {
+    font-size: 0.875rem;
+    color: #fff;
+    opacity: 0.8;
+    font-weight: 600;
+}
+
+.meta-sep {
+    color: #fff;
+    opacity: 0.4;
+}
+
+/* Genre pill tags */
+.genre-tags {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.genre-tag {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(4px);
+}
+
+.artist-album-count {
+    font-size: 0.82rem;
+    color: #fff;
+    opacity: 0.6;
+}
+
+/* ── Discography section ── */
+
+.discography-section {
+    padding: 2rem 2rem 4rem;
+}
+
+.discography-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.discography-heading {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* ── Album card meta row ── */
+
+.album-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    margin-bottom: 0.4rem;
+}
+
+/* ── Rating badge (reused from search page) ── */
+
+.card-rating-state {
+    margin-top: 0.4rem;
+    min-height: 1.4em;
+}
+
+.rating-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.rating-liked {
+    background: #1a3d28;
+    color: var(--color-like);
+}
+
+.rating-disliked {
+    background: #3d1a1a;
+    color: var(--color-dislike);
+}
+
+.rating-unrated {
+    background: var(--color-surface-2);
+    color: var(--color-muted);
+}
+
+/* ── Find on AlbumRank link ── */
+/*
+    Shown on album cards that are not yet in our database.
+    Clicking it pre-fills the search with the album name.
+*/
+.btn-find-album {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border);
+    color: var(--color-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    transition: border-color var(--transition), color var(--transition);
+}
+
+.btn-find-album:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+/* ── Back floating button ── */
+/*
+    Sits in the bottom-left corner as a persistent back navigation.
+    Uses history.back() so it works whether you came from search,
+    a collection, the dashboard, or the album detail page.
+*/
+.back-fab {
+    position: fixed;
+    bottom: 1.75rem;
+    left: 1.75rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-muted);
+    padding: 0.55rem 1.1rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.82rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-card);
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+    z-index: 200;
+}
+
+.back-fab:hover {
+    background: var(--color-surface-2);
+    border-color: var(--color-text);
+    color: var(--color-text);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 700px) {
+    .artist-hero {
+        padding: 2rem 1.25rem 1.75rem;
+        min-height: 220px;
+    }
+
+    .artist-hero-inner {
+        gap: 1.25rem;
+    }
+
+    .artist-photo,
+    .artist-photo-empty {
+        width: 120px;
+        height: 120px;
+    }
+
+    .discography-section {
+        padding: 1.5rem 1.25rem 3rem;
+    }
+
+    .back-fab {
+        bottom: 1rem;
+        left: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .artist-hero-inner {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .artist-meta {
+        justify-content: center;
+    }
+}

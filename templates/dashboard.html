@@ -1,0 +1,418 @@
+{# templates/dashboard.html #}
+{#
+Main dashboard — discovery hub.
+
+Variables passed from the dashboard route:
+recently_viewed — list of Album objects (last 6 visited)
+recent_collections — list of Playlist objects (last 4 opened/updated)
+trending — list of {album, like_count} dicts
+top_rated — list of {album, like_count} dicts
+new_arrivals — list of Album objects
+unrated — list of {album, like_count} dicts
+collections — all of the user's collections (bottom section)
+ratings — dict of { album_id: rating }
+all_mood_tags — list of MoodTag objects for the filter bar
+active_mood_ids — list of currently active mood tag IDs
+mood_mode — 'any' or 'all'
+no_public_albums — True if no public collections exist yet
+#}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | AlbumRank</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    {# ── Navigation ── #}
+    <nav class="nav-bar">
+        <div class="logo">AlbumRank</div>
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}" class="nav-active">Dashboard</a>
+            <a href="{{ url_for('collections') }}">Collections</a>
+            <a href="{{ url_for('search') }}">Search</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
+        </div>
+    </nav>
+
+    {# ── Flash messages ── #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {# ── Welcome + search ── #}
+    <section class="welcome-section">
+        <div class="welcome-inner">
+            <div class="welcome-text">
+                <h1>Welcome back, <span class="username">{{ current_user.username }}</span></h1>
+                <p>Discover new albums or pick up where you left off.</p>
+            </div>
+            <form method="GET" action="{{ url_for('search') }}" class="search-form">
+                <input type="text" name="query" class="search-input" placeholder="Search albums, artists, genres...">
+                <button type="submit" class="search-btn">Search</button>
+            </form>
+        </div>
+    </section>
+
+    {# ── Mood filter bar ── #}
+    {#
+    Clicking a tag adds its ID to the ?moods= query string.
+    Multiple tags can be active at once.
+    The mode toggle switches between 'any' and 'all'.
+    All filtering is handled server-side on page reload.
+    #}
+    <section class="mood-filter-bar">
+        <div class="mood-filter-inner">
+
+            <div class="mood-filter-tags">
+                <span class="filter-label">Filter by mood:</span>
+
+                {% for tag in all_mood_tags %}
+                {#
+                Build the URL for clicking this tag.
+                If it is already active, clicking it removes it.
+                If not active, clicking it adds it to the list.
+                #}
+                {% if tag.id in active_mood_ids %}
+                {% set new_ids = active_mood_ids | reject('equalto', tag.id) | list %}
+                {% else %}
+                {% set new_ids = active_mood_ids + [tag.id] %}
+                {% endif %}
+
+                {% if new_ids %}
+                {% set tag_url = url_for('dashboard', moods=new_ids|join(','), mood_mode=mood_mode) %}
+                {% else %}
+                {% set tag_url = url_for('dashboard') %}
+                {% endif %}
+
+                <a href="{{ tag_url }}"
+                    class="filter-tag {% if tag.id in active_mood_ids %}filter-tag-active{% endif %}">
+                    {{ tag.name }}
+                </a>
+                {% endfor %}
+            </div>
+
+            {# Mode toggle — only visible when at least one tag is active #}
+            {% if active_mood_ids %}
+            <div class="mood-mode-toggle">
+                {% if mood_mode == 'any' %}
+                <span class="mode-label">Matching any</span>
+                <a href="{{ url_for('dashboard', moods=active_mood_ids|join(','), mood_mode='all') }}"
+                    class="btn-mode-switch">
+                    Switch to Match All
+                </a>
+                {% else %}
+                <span class="mode-label">Matching all</span>
+                <a href="{{ url_for('dashboard', moods=active_mood_ids|join(','), mood_mode='any') }}"
+                    class="btn-mode-switch">
+                    Switch to Match Any
+                </a>
+                {% endif %}
+
+                <a href="{{ url_for('dashboard') }}" class="btn-clear-filter">Clear</a>
+            </div>
+            {% endif %}
+
+        </div>
+    </section>
+
+    {# ── Page body ── #}
+    <div class="dashboard-body">
+
+        {# ── Recent Activity ── #}
+        {% if recently_viewed or recent_collections %}
+        <section class="dash-section">
+            <h2 class="dash-section-title">Recent Activity</h2>
+
+            <div class="activity-grid">
+
+                {# Recently viewed albums #}
+                {% if recently_viewed %}
+                <div class="activity-block">
+                    <h3 class="activity-block-title">Albums you visited</h3>
+                    <div class="scroll-row">
+                        {% for album in recently_viewed %}
+                        {{ album_card(album, ratings.get(album.id)) }}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {# Recently interacted collections #}
+                {% if recent_collections %}
+                <div class="activity-block">
+                    <h3 class="activity-block-title">Collections</h3>
+                    <div class="recent-collections-list">
+                        {% for col in recent_collections %}
+                        <a href="{{ url_for('view_collection', collection_id=col.id) }}" class="recent-col-item">
+                            {# Show up to 4 cover thumbnails #}
+                            <div class="recent-col-covers">
+                                {% for album in col.albums[:4] %}
+                                {% if album.image_url %}
+                                <img src="{{ album.image_url }}" alt="{{ album.name }}" class="mini-cover">
+                                {% else %}
+                                <div class="mini-cover mini-cover-empty"></div>
+                                {% endif %}
+                                {% endfor %}
+                                {% for i in range(4 - [col.albums|length, 4]|min) %}
+                                <div class="mini-cover mini-cover-empty"></div>
+                                {% endfor %}
+                            </div>
+                            <div class="recent-col-info">
+                                <span class="recent-col-name">{{ col.name }}</span>
+                                <span class="recent-col-meta">
+                                    {{ col.albums|length }}
+                                    {{ 'album' if col.albums|length == 1 else 'albums' }}
+                                    &middot;
+                                    {{ 'Public' if col.is_public else 'Private' }}
+                                </span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </section>
+        {% endif %}
+
+        {# ── No public albums yet — show a helpful message ── #}
+        {% if no_public_albums %}
+        <section class="dash-section">
+            <div class="discovery-empty">
+                <h3>Discovery sections will appear here</h3>
+                <p>
+                    Once users add albums to public collections, trending,
+                    top rated, and new arrivals will show up here.
+                    Make your own collections public to contribute.
+                </p>
+                <a href="{{ url_for('collections') }}" class="btn-primary">
+                    Manage Collections
+                </a>
+            </div>
+        </section>
+
+        {% else %}
+
+        {# ── Trending this week ── #}
+        {% if trending %}
+        <section class="dash-section">
+            <div class="dash-section-header">
+                <h2 class="dash-section-title">Trending This Week</h2>
+                <span class="dash-section-sub">Most liked in the last 7 days</span>
+            </div>
+            <div class="scroll-row">
+                {% for item in trending %}
+                {{ album_card(item.album, ratings.get(item.album.id), item.like_count) }}
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {# ── Top rated overall ── #}
+        {% if top_rated %}
+        <section class="dash-section">
+            <div class="dash-section-header">
+                <h2 class="dash-section-title">Top Rated</h2>
+                <span class="dash-section-sub">Highest liked of all time</span>
+            </div>
+            <div class="scroll-row">
+                {% for item in top_rated %}
+                {{ album_card(item.album, ratings.get(item.album.id), item.like_count) }}
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {# ── New arrivals ── #}
+        {% if new_arrivals %}
+        <section class="dash-section">
+            <div class="dash-section-header">
+                <h2 class="dash-section-title">New Arrivals</h2>
+                <span class="dash-section-sub">Recently added to AlbumRank</span>
+            </div>
+            <div class="scroll-row">
+                {% for album in new_arrivals %}
+                {{ album_card(album, ratings.get(album.id)) }}
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {# ── Unrated by you ── #}
+        {% if unrated %}
+        <section class="dash-section">
+            <div class="dash-section-header">
+                <h2 class="dash-section-title">You Might Like</h2>
+                <span class="dash-section-sub">Liked by others — not yet rated by you</span>
+            </div>
+            <div class="scroll-row">
+                {% for item in unrated %}
+                {{ album_card(item.album, ratings.get(item.album.id), item.like_count) }}
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% endif %}{# end no_public_albums #}
+
+        {# ── Your Collections ── #}
+        <section class="dash-section">
+            <div class="dash-section-header">
+                <h2 class="dash-section-title">Your Collections</h2>
+                <a href="{{ url_for('create_collection') }}" class="dash-section-link">
+                    New Collection
+                </a>
+            </div>
+
+            {% if collections %}
+            <div class="collections-row">
+                {% for col in collections %}
+                <a href="{{ url_for('view_collection', collection_id=col.id) }}" class="col-chip">
+                    <div class="col-chip-covers">
+                        {% for album in col.albums[:2] %}
+                        {% if album.image_url %}
+                        <img src="{{ album.image_url }}" alt="" class="col-chip-thumb">
+                        {% else %}
+                        <div class="col-chip-thumb col-chip-empty"></div>
+                        {% endif %}
+                        {% endfor %}
+                        {% for i in range(2 - [col.albums|length, 2]|min) %}
+                        <div class="col-chip-thumb col-chip-empty"></div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-chip-info">
+                        <span class="col-chip-name">{{ col.name }}</span>
+                        <span class="col-chip-count">
+                            {{ col.albums|length }}
+                            {{ 'album' if col.albums|length == 1 else 'albums' }}
+                        </span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty-msg">
+                No collections yet.
+                <a href="{{ url_for('create_collection') }}">Create your first one.</a>
+            </p>
+            {% endif %}
+        </section>
+
+    </div>{# end dashboard-body #}
+
+    {# ── Toast ── #}
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+
+    {# ══════════════════════════════════════════════════════════
+    ALBUM CARD MACRO
+    Renders a compact album card used in every scroll row.
+    Parameters:
+    album — Album object
+    user_rating — 1, -1, or None
+    like_count — optional int shown as a badge
+    ══════════════════════════════════════════════════════════ #}
+    {% macro album_card(album, user_rating, like_count=None) %}
+    <div class="scroll-card" id="dash-card-{{ album.id }}">
+
+        <a href="{{ url_for('album_detail', album_id=album.id) }}" class="scroll-card-img-link">
+            {% if album.image_url %}
+            <img src="{{ album.image_url }}" alt="{{ album.name }}" class="scroll-card-img">
+            {% else %}
+            <div class="scroll-card-img scroll-card-img-empty">No cover</div>
+            {% endif %}
+
+            {% if like_count %}
+            <span class="like-badge">{{ like_count }} liked</span>
+            {% endif %}
+        </a>
+
+        <div class="scroll-card-info">
+            <h3 class="scroll-card-name">
+                <a href="{{ url_for('album_detail', album_id=album.id) }}">{{ album.name }}</a>
+            </h3>
+
+            {% if album.artist_id %}
+            <p class="scroll-card-artist">
+                <a href="{{ url_for('artist_page', spotify_artist_id=album.artist_id) }}" class="artist-link">
+                    {{ album.artist }}
+                </a>
+            </p>
+            {% else %}
+            <p class="scroll-card-artist">{{ album.artist }}</p>
+            {% endif %}
+
+            <div class="scroll-card-rating">
+                <button class="btn-rate btn-like {% if user_rating == 1 %}active{% endif %}"
+                    data-album-id="{{ album.id }}" data-rating="1" aria-label="Like {{ album.name }}">Like</button>
+                <button class="btn-rate btn-dislike {% if user_rating == -1 %}active{% endif %}"
+                    data-album-id="{{ album.id }}" data-rating="-1"
+                    aria-label="Dislike {{ album.name }}">Dislike</button>
+            </div>
+        </div>
+
+    </div>
+    {% endmacro %}
+
+
+    {# ── JavaScript ── #}
+    <script>
+        // Rating buttons — same AJAX pattern used throughout the app
+        document.addEventListener('click', function (e) {
+            let btn = e.target.closest('.btn-rate');
+            if (!btn) return;
+
+            let albumId = btn.getAttribute('data-album-id');
+            let rating = btn.getAttribute('data-rating');
+
+            let formData = new FormData();
+            formData.append('album_id', albumId);
+            formData.append('rating', rating);
+
+            fetch('{{ url_for("rate_album") }}', {
+                method: 'POST',
+                body: formData
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    // Update all cards with this album ID (it may appear in multiple rows)
+                    document.querySelectorAll('#dash-card-' + albumId + ' .btn-like').forEach(function (b) {
+                        b.classList.toggle('active', data.rating === 1);
+                    });
+                    document.querySelectorAll('#dash-card-' + albumId + ' .btn-dislike').forEach(function (b) {
+                        b.classList.toggle('active', data.rating === -1);
+                    });
+
+                    if (data.status === 'removed') showToast('Rating removed');
+                    else if (data.rating === 1) showToast('Liked');
+                    else showToast('Disliked');
+                })
+                .catch(function () { showToast('Something went wrong.'); });
+        });
+
+        function showToast(message) {
+            let toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(function () { toast.classList.remove('show'); }, 2500);
+        }
+    </script>
+
+</body>
+
+</html>
