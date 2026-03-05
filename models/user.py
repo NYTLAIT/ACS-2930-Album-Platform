@@ -38,7 +38,7 @@ class User(db.Model, UserMixin):
     # ── Password helpers ──────────────────────────────────────
     def set_password(self, password: str) -> None:
         """Hash and store a plaintext password."""
-        self.password_hash = generate_password_hash(password)
+        self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
 
     def check_password(self, password: str) -> bool:
         """Return True if the plaintext password matches the stored hash."""

@@ -12,6 +12,8 @@ class DevelopmentConfig(Config):
     """Development configuration"""
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///album_platform.db")
     DEBUG = True
+    # Im hell not dealign with csrf
+    WTF_CSRF_ENABLED = False 
 
 class ProductionConfig(Config):
     """Production configuration"""

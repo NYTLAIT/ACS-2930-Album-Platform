@@ -22,6 +22,7 @@ from datetime import datetime, timedelta
 import spotipy
 from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
+from flask_wtf import CSRFProtect
 
 from spotipy.oauth2 import SpotifyClientCredentials
 from sqlalchemy import func
@@ -47,6 +48,11 @@ load_dotenv()
 def create_app(config_class=DevelopmentConfig):
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    # ── Initialize CSRF ─────────────────────────────
+    csrf = CSRFProtect(app)
+    if not app.config.get("WTF_CSRF_ENABLED", True):
+        csrf._disable_on_request = True
 
     # ── Database ──────────────────────────────────────────────
     init_db(app)
@@ -842,7 +848,7 @@ def create_app(config_class=DevelopmentConfig):
 
         if query:
             try:
-                results = app.spotify.search(q=query, type="album", limit=12)
+                results = app.spotify.search(q=query, type="album", limit=10)
                 for item in results.get("albums", {}).get("items", []):
                     albums.append({
                         "spotify_id":   item.get("id", ""),
@@ -897,7 +903,7 @@ def create_app(config_class=DevelopmentConfig):
         try:
             artist_data = app.spotify.artist(spotify_artist_id)
             albums_data = app.spotify.artist_albums(
-                spotify_artist_id, album_type="album", limit=20
+                spotify_artist_id, album_type="album", limit=10
             )
 
             images         = artist_data.get("images") or []
