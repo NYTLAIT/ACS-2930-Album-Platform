@@ -1,6 +1,6 @@
-AlbumRank — Project Documentation
+Ecouter — Project Documentation
 Overview
-AlbumRank is a Flask web application for people who listen to albums, not just singles.
+Ecouter is a Flask web application for people who listen to albums, not just singles.
 Users build collections, rate albums, tag moods, leave threaded comments, and discover
 what other listeners are enjoying. All album and artist data is pulled live from the
 Spotify API.
@@ -48,7 +48,7 @@ Create a .env file in the project root:
 SPOTIFY_CLIENT_ID=your_spotify_client_id
 SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
 SECRET_KEY=a_long_random_string_for_flask_sessions
-DATABASE_URL=sqlite:///albumrank.db
+DATABASE_URL=sqlite:///Ecouter.db
 Get Spotify credentials at https://developer.spotify.com/dashboard
 
 Setup
@@ -71,7 +71,7 @@ find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null
 find . -name "*.pyc" -delete
 
 # Delete the database
-rm albumrank.db
+rm Ecouter.db
 
 # Restart — tables and mood tags are recreated automatically
 flask run

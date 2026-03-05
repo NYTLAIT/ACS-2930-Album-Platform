@@ -1,6 +1,6 @@
-# AlbumRank — Backend Documentation
+# Ecouter — Backend Documentation
 
-How the server side of AlbumRank works, from the database up to every route.
+How the server side of Ecouter works, from the database up to every route.
 
 ---
 

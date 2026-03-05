@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ artist.name }} | AlbumRank</title>
+    <title>{{ artist.name }} | Ecouter</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='artist.css') }}">
     <link
@@ -15,7 +15,7 @@
 <body>
 
     <nav class="nav-bar">
-        <div class="logo">AlbumRank</div>
+        <div class="logo">Ecouter</div>
         <div class="nav-links">
             <a href="{{ url_for('dashboard') }}">Dashboard</a>
             <a href="{{ url_for('collections') }}">Collections</a>
@@ -120,7 +120,7 @@
                             {% endif %}
                             {% else %}
                             <a href="{{ url_for('search', query=album.name) }}" class="btn-find-album">
-                                Find on AlbumRank
+                                Find on Ecouter
                             </a>
                             {% endif %}
                         </div>

@@ -1,4 +1,4 @@
-# AlbumRank — Backend Routes Reference
+# Ecouter — Backend Routes Reference
 
 Every route in `ecouter.py`, explained in full detail.
 

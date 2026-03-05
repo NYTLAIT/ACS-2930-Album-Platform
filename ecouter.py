@@ -141,7 +141,7 @@ def create_app(config_class=DevelopmentConfig):
             db.session.add(user)
             db.session.commit()
             login_user(user)
-            flash("Welcome to AlbumRank!", "success")
+            flash("Welcome to Ecouter!", "success")
             return redirect(url_for("dashboard"))
 
         return render_template("signup.html", form=form)

@@ -1,4 +1,4 @@
-# AlbumRank — Frontend Documentation
+# Ecouter — Frontend Documentation
 
 How the templates, CSS, and JavaScript work together.
 
@@ -158,7 +158,7 @@ The `like_count` parameter is optional — it shows a badge on cards in sections
 
 ## 5. How AJAX Works
 
-AJAX lets JavaScript send data to the server and update the page without reloading. AlbumRank uses the browser's built-in `fetch()` API everywhere.
+AJAX lets JavaScript send data to the server and update the page without reloading. Ecouter uses the browser's built-in `fetch()` API everywhere.
 
 ### The Pattern
 
@@ -349,7 +349,7 @@ Each page has its own CSS file. Every file starts by importing `global.css`:
 /* global.css is loaded via a separate <link> tag in the HTML head */
 ```
 
-Actually in AlbumRank, each template loads `global.css` and its own CSS file as separate `<link>` tags:
+Actually in Ecouter, each template loads `global.css` and its own CSS file as separate `<link>` tags:
 
 ```html
 <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
@@ -428,7 +428,7 @@ Flask's `flash()` queues a one-time notification. Templates display them like th
 {% endwith %}
 ```
 
-Categories used in AlbumRank: `success`, `danger`, `info`. These map to CSS classes in `global.css` that apply different background colours.
+Categories used in Ecouter: `success`, `danger`, `info`. These map to CSS classes in `global.css` that apply different background colours.
 
 ---
 

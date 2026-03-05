@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | AlbumRank</title>
+    <title>Dashboard | Ecouter</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
     <link
@@ -15,7 +15,7 @@
 <body>
 
     <nav class="nav-bar">
-        <div class="logo">AlbumRank</div>
+        <div class="logo">Ecouter</div>
         <div class="nav-links">
             <a href="{{ url_for('dashboard') }}" class="nav-active">Dashboard</a>
             <a href="{{ url_for('collections') }}">Collections</a>
@@ -227,7 +227,7 @@ like_count — optional int badge
         <section class="dash-section">
             <div class="dash-section-header">
                 <h2 class="dash-section-title">New Arrivals</h2>
-                <span class="dash-section-sub">Recently added to AlbumRank</span>
+                <span class="dash-section-sub">Recently added to Ecouter</span>
             </div>
             <div class="scroll-row">
                 {% for album in new_arrivals %}
