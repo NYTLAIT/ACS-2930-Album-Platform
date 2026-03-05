@@ -1,41 +1,31 @@
-/* =============================================================================
-   album_detail.css
-   Styles for the album detail page.
-   Shared components come from global.css.
-============================================================================= */
-
-@import url('global.css');
-
-/* ── Two-column layout ── */
+/* album_detail.css — album detail page */
+@import url("global.css");
 
 .detail-layout {
     display: flex;
     gap: 2rem;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 2rem 4rem;
+    padding: 1.75rem 2rem 4rem;
     align-items: flex-start;
 }
 
 .detail-main {
     flex: 1;
     min-width: 0;
-    /* prevents flex children from overflowing */
 }
 
 .detail-sidebar {
-    width: 320px;
+    width: 300px;
     flex-shrink: 0;
     position: sticky;
-    top: 80px;
-    /* sticks just below the nav bar */
+    top: 72px;
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-/* ── Album header ── */
-
+/* Album header */
 .album-header {
     display: flex;
     gap: 1.5rem;
@@ -49,339 +39,311 @@
 }
 
 .album-cover {
-    width: 200px;
-    height: 200px;
+    width: 190px;
+    height: 190px;
     object-fit: cover;
-    border-radius: var(--radius-md);
+    border-radius: var(--r-md);
     box-shadow: var(--shadow-card);
     display: block;
 }
 
 .album-cover-empty {
-    width: 200px;
-    height: 200px;
-    border-radius: var(--radius-md);
-    background: var(--color-surface-2);
+    width: 190px;
+    height: 190px;
+    border-radius: var(--r-md);
+    background: var(--surface-2);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.85rem;
-    color: var(--color-muted);
+    font-size: 0.82rem;
+    color: var(--muted);
 }
 
 .album-header-info {
     flex: 1;
     min-width: 0;
-    padding-top: 0.5rem;
+    padding-top: 0.4rem;
 }
 
 .detail-label {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-muted);
-    margin-bottom: 0.4rem;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
 }
 
 .detail-album-title {
     font-family: var(--font-display);
-    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-size: clamp(1.4rem, 4vw, 2.1rem);
     font-weight: 700;
-    color: var(--color-text);
     line-height: 1.15;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
 }
 
 .detail-artist {
-    font-size: 1.05rem;
-    color: var(--color-muted);
-    margin-bottom: 0.6rem;
-}
-
-.artist-link {
-    transition: color var(--transition);
-}
-
-.artist-link:hover {
-    color: var(--color-accent);
+    font-size: 1rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
 }
 
 .album-meta-row {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.85rem;
-    color: var(--color-muted);
+    font-size: 0.82rem;
+    color: var(--muted);
     flex-wrap: wrap;
 }
 
 .meta-sep {
-    color: var(--color-border);
+    color: var(--border);
 }
 
-/* ── Section wrapper ── */
-
+/* Sections */
 .detail-section {
-    margin-bottom: 2.5rem;
+    margin-bottom: 2.25rem;
 }
 
 .section-title {
     font-family: var(--font-display);
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 0.5rem;
+    margin-bottom: 0.9rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.4rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 
 .comment-count {
-    font-size: 0.8rem;
-    color: var(--color-muted);
+    font-size: 0.78rem;
+    color: var(--muted);
     font-weight: 400;
 }
 
-/* ── Tracklist ── */
-
+/* Tracklist */
 .tracklist {
     list-style: none;
-    counter-reset: none;
 }
 
 .track-row {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.55rem 0.5rem;
-    border-radius: var(--radius-sm);
-    transition: background var(--transition);
+    gap: 0.7rem;
+    padding: 0.5rem 0.4rem;
+    border-radius: var(--r-sm);
+    transition: background var(--ease);
 }
 
 .track-row:hover {
-    background: var(--color-surface);
+    background: var(--surface);
 }
 
 .track-number {
-    width: 1.5rem;
+    width: 1.4rem;
     text-align: right;
-    font-size: 0.8rem;
-    color: var(--color-muted);
+    font-size: 0.78rem;
+    color: var(--muted);
     flex-shrink: 0;
 }
 
 .track-name {
     flex: 1;
-    font-size: 0.9rem;
-    color: var(--color-text);
-    min-width: 0;
-
-    /* Prevent long track names from breaking layout */
+    font-size: 0.875rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .track-duration {
-    font-size: 0.8rem;
-    color: var(--color-muted);
+    font-size: 0.78rem;
+    color: var(--muted);
     flex-shrink: 0;
 }
 
-/* ── Comments ── */
-
+/* Comments */
 .comment-form {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.4rem;
 }
 
 .comment-input {
     width: 100%;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    color: var(--text);
+    padding: 0.7rem 0.9rem;
     resize: vertical;
     outline: none;
-    transition: border-color var(--transition);
-    min-height: 80px;
+    transition: border-color var(--ease);
+    min-height: 76px;
     display: block;
+    font-size: 0.875rem;
 }
 
 .comment-input:focus {
-    border-color: var(--color-accent);
+    border-color: var(--accent);
 }
 
 .comment-input::placeholder {
-    color: var(--color-muted);
+    color: var(--muted);
 }
 
 .comment-form-actions {
     display: flex;
     gap: 0.5rem;
-    margin-top: 0.5rem;
+    margin-top: 0.45rem;
 }
 
 .btn-post-comment {
-    padding: 0.45rem 1.1rem;
-    background: var(--color-accent);
+    padding: 0.42rem 1rem;
+    background: var(--accent);
     color: #fff;
     border: none;
-    border-radius: var(--radius-pill);
-    font-size: 0.85rem;
+    border-radius: var(--r-pill);
+    font-size: 0.82rem;
     font-weight: 700;
     cursor: pointer;
-    transition: background var(--transition);
+    transition: background var(--ease);
 }
 
 .btn-post-comment:hover {
-    background: var(--color-accent-warm);
+    background: var(--accent-warm);
     color: #121212;
 }
 
 .btn-cancel-reply {
-    padding: 0.45rem 0.9rem;
+    padding: 0.42rem 0.85rem;
     background: transparent;
-    color: var(--color-muted);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
-    font-size: 0.85rem;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: var(--r-pill);
+    font-size: 0.82rem;
     cursor: pointer;
-    transition: border-color var(--transition), color var(--transition);
+    transition: border-color var(--ease), color var(--ease);
 }
 
 .btn-cancel-reply:hover {
-    border-color: var(--color-text);
-    color: var(--color-text);
+    border-color: var(--text);
+    color: var(--text);
 }
 
 .no-comments {
-    font-size: 0.9rem;
-    color: var(--color-muted);
-    padding: 0.5rem 0;
+    font-size: 0.875rem;
+    color: var(--muted);
 }
 
-/* ── Comment block ── */
-
+/* Comment block */
 .comment-block {
-    margin-bottom: 1rem;
+    margin-bottom: 0.85rem;
 }
 
-/* Indent replies based on data-depth attribute */
 .comment-reply {
-    margin-left: 1.5rem;
+    margin-left: 1.4rem;
 }
 
 .comment-inner {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 0.9rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 0.8rem 0.9rem;
 }
 
 .comment-header {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    margin-bottom: 0.5rem;
+    gap: 0.55rem;
+    margin-bottom: 0.4rem;
 }
 
 .comment-author {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 700;
-    color: var(--color-accent);
+    color: var(--accent);
 }
 
 .comment-time {
-    font-size: 0.75rem;
-    color: var(--color-muted);
+    font-size: 0.72rem;
+    color: var(--muted);
 }
 
 .comment-body {
-    font-size: 0.9rem;
-    color: var(--color-text);
+    font-size: 0.875rem;
     line-height: 1.6;
-    margin-bottom: 0.65rem;
+    margin-bottom: 0.55rem;
     white-space: pre-wrap;
     word-break: break-word;
 }
 
-/* ── Vote buttons ── */
-
 .comment-footer {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
 }
 
 .btn-vote {
     background: none;
     border: none;
-    color: var(--color-muted);
+    color: var(--muted);
     cursor: pointer;
-    font-size: 0.8rem;
-    padding: 2px 5px;
-    border-radius: var(--radius-sm);
-    transition: color var(--transition), background var(--transition);
+    font-size: 0.78rem;
+    padding: 2px 4px;
+    border-radius: var(--r-sm);
+    transition: color var(--ease), background var(--ease);
 }
 
 .btn-vote:hover {
-    background: var(--color-surface-2);
-    color: var(--color-text);
+    background: var(--surface-2);
+    color: var(--text);
 }
 
 .vote-active-up {
-    color: var(--color-like) !important;
+    color: var(--like) !important;
 }
 
 .vote-active-down {
-    color: var(--color-dislike) !important;
+    color: var(--dislike) !important;
 }
 
 .vote-score {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 700;
-    color: var(--color-muted);
-    min-width: 1.5rem;
+    color: var(--muted);
+    min-width: 1.4rem;
     text-align: center;
 }
 
 .score-positive {
-    color: var(--color-like);
+    color: var(--like);
 }
 
 .score-negative {
-    color: var(--color-dislike);
+    color: var(--dislike);
 }
 
 .btn-reply-toggle {
     background: none;
     border: none;
-    color: var(--color-muted);
-    font-size: 0.8rem;
+    color: var(--muted);
+    font-size: 0.78rem;
     cursor: pointer;
-    padding: 2px 6px;
-    border-radius: var(--radius-sm);
-    margin-left: 0.25rem;
-    transition: color var(--transition), background var(--transition);
+    padding: 2px 5px;
+    border-radius: var(--r-sm);
+    margin-left: 0.2rem;
+    transition: color var(--ease), background var(--ease);
 }
 
 .btn-reply-toggle:hover {
-    background: var(--color-surface-2);
-    color: var(--color-text);
+    background: var(--surface-2);
+    color: var(--text);
 }
-
-/* ── Reply form ── */
-/* Hidden by default, shown when .open is added by JS */
 
 .reply-form-wrap {
     display: none;
-    margin-top: 0.75rem;
+    margin-top: 0.65rem;
 }
 
 .reply-form-wrap.open {
@@ -389,17 +351,12 @@
 }
 
 .reply-form .comment-input {
-    min-height: 60px;
+    min-height: 56px;
 }
-
-/* ── Replies container ── */
 
 .replies-wrap {
-    margin-top: 0.5rem;
+    margin-top: 0.45rem;
 }
-
-/* ── Collapsed overflow replies ── */
-/* Hidden by default, shown when .expanded is added by JS */
 
 .overflow-replies {
     display: none;
@@ -411,262 +368,245 @@
 
 .btn-show-more {
     display: inline-block;
-    margin-top: 0.5rem;
-    margin-left: 1.5rem;
+    margin: 0.4rem 0 0 1.4rem;
     background: none;
     border: none;
-    color: var(--color-accent);
-    font-size: 0.82rem;
+    color: var(--accent);
+    font-size: 0.78rem;
     font-weight: 600;
     cursor: pointer;
     padding: 0;
-    transition: color var(--transition);
+    transition: color var(--ease);
 }
 
 .btn-show-more:hover {
-    color: var(--color-accent-warm);
+    color: var(--accent-warm);
 }
 
-/* ── Sidebar cards ── */
-
+/* Sidebar */
 .sidebar-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 1.1rem 1.1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 1rem 1.05rem 1.1rem;
 }
 
 .sidebar-card-title {
     font-family: var(--font-display);
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.7rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: 0.4rem;
     flex-wrap: wrap;
 }
 
 .sidebar-card-sub {
-    font-size: 0.78rem;
-    color: var(--color-muted);
-    margin-bottom: 0.6rem;
-    margin-top: -0.4rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 0.55rem;
+    margin-top: -0.35rem;
 }
-
-/* ── Rating buttons in sidebar ── */
 
 .rating-buttons {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.9rem;
+    gap: 0.45rem;
+    margin-bottom: 0.8rem;
 }
 
 .btn-rate {
     flex: 1;
-    padding: 0.55rem 0.5rem;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
+    padding: 0.5rem 0.4rem;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
     background: transparent;
-    color: var(--color-muted);
-    font-size: 0.85rem;
+    color: var(--muted);
+    font-size: 0.82rem;
     font-weight: 700;
     cursor: pointer;
-    transition: background var(--transition), border-color var(--transition), color var(--transition);
+    transition: background var(--ease), border-color var(--ease), color var(--ease);
 }
 
 .btn-rate:hover {
-    border-color: var(--color-text);
-    color: var(--color-text);
+    border-color: var(--text);
+    color: var(--text);
 }
 
 .btn-like.active {
     background: #1a3d28;
-    border-color: var(--color-like);
-    color: var(--color-like);
+    border-color: var(--like);
+    color: var(--like);
 }
 
 .btn-dislike.active {
     background: #3d1a1a;
-    border-color: var(--color-dislike);
-    color: var(--color-dislike);
+    border-color: var(--dislike);
+    color: var(--dislike);
 }
-
-/* Community rating totals */
 
 .rating-totals {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.65rem;
 }
 
 .rating-total {
     flex: 1;
     text-align: center;
-    padding: 0.5rem;
-    border-radius: var(--radius-sm);
-    background: var(--color-surface-2);
+    padding: 0.45rem;
+    border-radius: var(--r-sm);
+    background: var(--surface-2);
 }
 
 .total-count {
     display: block;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 700;
 }
 
 .total-label {
-    font-size: 0.72rem;
-    color: var(--color-muted);
+    font-size: 0.7rem;
+    color: var(--muted);
 }
 
 .like-total .total-count {
-    color: var(--color-like);
+    color: var(--like);
 }
 
 .dislike-total .total-count {
-    color: var(--color-dislike);
+    color: var(--dislike);
 }
-
-/* ── Mood tags ── */
 
 .mood-limit-note {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 400;
-    color: var(--color-muted);
+    color: var(--muted);
 }
 
-/* Aggregated mood summary bars */
 .mood-summary {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.7rem;
 }
 
 .mood-bar-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.25rem 0;
-    font-size: 0.8rem;
+    padding: 0.22rem 0;
+    font-size: 0.78rem;
 }
 
 .mood-bar-label {
-    color: var(--color-text);
+    color: var(--text);
 }
 
 .mood-bar-count {
-    color: var(--color-muted);
+    color: var(--muted);
 }
 
 .mood-divider {
     border: none;
-    border-top: 1px solid var(--color-border);
-    margin-bottom: 0.75rem;
+    border-top: 1px solid var(--border);
+    margin-bottom: 0.7rem;
 }
 
-/* Tag picker */
 .mood-picker {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.65rem;
 }
 
 .mood-category-label {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--color-muted);
-    margin-bottom: 0.35rem;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
 }
 
 .mood-tag-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: 0.35rem;
 }
 
 .btn-mood-tag {
-    padding: 0.3rem 0.7rem;
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--color-border);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--border);
     background: transparent;
-    color: var(--color-muted);
-    font-size: 0.78rem;
+    color: var(--muted);
+    font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background var(--transition), border-color var(--transition), color var(--transition);
+    transition: background var(--ease), border-color var(--ease), color var(--ease);
 }
 
 .btn-mood-tag:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
-/* Active mood tag */
 .btn-mood-tag.mood-active {
-    background: rgba(255, 95, 109, 0.15);
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    background: rgba(255, 95, 109, 0.12);
+    border-color: var(--accent);
+    color: var(--accent);
 }
-
-/* ── Private notes ── */
 
 .notes-input {
     width: 100%;
-    background: var(--color-surface-2);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    font-size: 0.875rem;
-    padding: 0.65rem 0.85rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    color: var(--text);
+    padding: 0.6rem 0.8rem;
     resize: vertical;
     outline: none;
-    transition: border-color var(--transition);
+    transition: border-color var(--ease);
     display: block;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.55rem;
+    font-size: 0.82rem;
 }
 
 .notes-input:focus {
-    border-color: var(--color-accent);
+    border-color: var(--accent);
 }
 
 .notes-input::placeholder {
-    color: var(--color-muted);
+    color: var(--muted);
 }
 
 .btn-save-notes {
-    padding: 0.45rem 1.1rem;
-    background: var(--color-accent);
+    padding: 0.42rem 1rem;
+    background: var(--accent);
     color: #fff;
     border: none;
-    border-radius: var(--radius-pill);
-    font-size: 0.85rem;
+    border-radius: var(--r-pill);
+    font-size: 0.82rem;
     font-weight: 700;
     cursor: pointer;
-    transition: background var(--transition);
+    transition: background var(--ease);
 }
 
 .btn-save-notes:hover {
-    background: var(--color-accent-warm);
+    background: var(--accent-warm);
     color: #121212;
 }
 
 .notes-status {
-    font-size: 0.78rem;
-    margin-left: 0.6rem;
-    color: var(--color-muted);
+    font-size: 0.75rem;
+    margin-left: 0.55rem;
+    color: var(--muted);
 }
 
 .notes-saved {
-    color: var(--color-like);
+    color: var(--like);
 }
 
 .notes-error {
-    color: var(--color-dislike);
+    color: var(--dislike);
 }
-
-/* ── Responsive ── */
 
 @media (max-width: 900px) {
     .detail-layout {
@@ -681,21 +621,14 @@
 
     .album-cover,
     .album-cover-empty {
-        width: 140px;
-        height: 140px;
+        width: 150px;
+        height: 150px;
     }
 }
 
 @media (max-width: 500px) {
     .album-header {
         flex-direction: column;
-    }
-
-    .album-cover,
-    .album-cover-empty {
-        width: 100%;
-        height: auto;
-        aspect-ratio: 1;
     }
 
     .comment-reply {

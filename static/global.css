@@ -1,64 +1,38 @@
-/* =============================================================================
-   global.css
-   This is the single source of truth for all colours, fonts, spacing, and
-   shared components. Every other CSS file starts with @import url('global.css').
-   To change the look of the entire app, edit the variables in :root below.
-============================================================================= */
+/*
+  global.css
+  Design tokens, resets, and shared components used across every page.
+  All other CSS files import this one.
+*/
 
-/* --- Variables --- */
-/* These are CSS custom properties (variables). Use var(--name) anywhere. */
+/* ── Design tokens ─────────────────────────────────────────── */
 :root {
-    /* Brand colours */
-    --color-accent: #ff5f6d;
-    /* coral red — primary buttons, highlights */
-    --color-accent-warm: #ffc371;
-    /* warm orange — hover states, gradients   */
+    --bg: #121212;
+    --surface: #1e1e1e;
+    --surface-2: #2a2a2a;
+    --border: #2e2e2e;
+    --accent: #ff5f6d;
+    --accent-warm: #ffc371;
+    --text: #f0f0f0;
+    --muted: #888888;
+    --like: #4ade80;
+    --dislike: #f87171;
+    --info: #93c5fd;
 
-    /* Page backgrounds */
-    --color-bg: #121212;
-    /* main page background    */
-    --color-surface: #1e1e1e;
-    /* cards, nav, panels      */
-    --color-surface-2: #2a2a2a;
-    /* inputs, secondary cards */
+    --r-sm: 6px;
+    --r-md: 12px;
+    --r-lg: 20px;
+    --r-pill: 50px;
 
-    /* Text */
-    --color-text: #f0f0f0;
-    /* primary text   */
-    --color-muted: #888888;
-    /* secondary text */
+    --font-body: "Roboto", sans-serif;
+    --font-display: "Montserrat", sans-serif;
+    --ease: 0.2s ease;
 
-    /* Borders */
-    --color-border: #333333;
-
-    /* Feedback colours */
-    --color-like: #4ade80;
-    /* green — like / success  */
-    --color-dislike: #f87171;
-    /* red   — dislike / error */
-    --color-info: #93c5fd;
-    /* blue  — info messages   */
-
-    /* Border radius */
-    --radius-sm: 6px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
-    --radius-pill: 50px;
-
-    /* Shadows */
-    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4);
-    --shadow-glow: 0 8px 24px rgba(255, 95, 109, 0.25);
-    --shadow-modal: 0 12px 48px rgba(0, 0, 0, 0.6);
-
-    /* Typography */
-    --font-body: 'Roboto', sans-serif;
-    --font-display: 'Montserrat', sans-serif;
-
-    /* Transitions */
-    --transition: 0.2s ease;
+    --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 8px 24px rgba(255, 95, 109, 0.15);
 }
 
-/* --- Reset --- */
+/* ── Reset ─────────────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -67,21 +41,21 @@
     padding: 0;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: var(--font-body);
-    background: var(--color-bg);
-    color: var(--color-text);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
     min-height: 100vh;
 }
 
 a {
-    color: inherit;
     text-decoration: none;
-}
-
-button {
-    font-family: inherit;
-    cursor: pointer;
+    color: inherit;
 }
 
 img {
@@ -89,24 +63,34 @@ img {
     max-width: 100%;
 }
 
-/* --- Navigation bar --- */
-/* Used on every page that is not the auth pages */
+button,
+input,
+textarea,
+select {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+/* ── Navigation ─────────────────────────────────────────────── */
 .nav-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.9rem 2rem;
-    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-warm));
+    padding: 0 2rem;
+    height: 56px;
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(8px);
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 200;
+    border-bottom: 1px solid var(--border);
 }
 
-.nav-bar .logo {
+.logo {
     font-family: var(--font-display);
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--accent);
     letter-spacing: 0.02em;
 }
 
@@ -117,268 +101,39 @@ img {
 }
 
 .nav-links a {
+    font-size: 0.875rem;
     font-weight: 600;
-    font-size: 0.9rem;
-    color: #fff;
-    transition: opacity var(--transition);
+    color: var(--muted);
+    transition: color var(--ease);
 }
 
 .nav-links a:hover {
-    opacity: 0.75;
+    color: var(--text);
 }
 
-.nav-links .logout-btn {
-    background: rgba(0, 0, 0, 0.2);
+.nav-active {
+    color: var(--text) !important;
+    border-bottom: 2px solid var(--text);
+    padding-bottom: 2px;
+}
+
+.logout-btn {
     padding: 0.35rem 0.9rem;
-    border-radius: var(--radius-pill);
-    transition: background var(--transition);
+    border-radius: var(--r-pill);
+    border: 1px solid var(--border);
+    transition: border-color var(--ease), color var(--ease) !important;
 }
 
-.nav-links .logout-btn:hover {
-    background: rgba(0, 0, 0, 0.4);
-    opacity: 1;
+.logout-btn:hover {
+    border-color: var(--dislike) !important;
+    color: var(--dislike) !important;
 }
 
-/* --- Flash messages --- */
-/* These appear at the top of the page after an action */
-.flash-container {
-    padding: 0.75rem 2rem;
-}
-
-.flash-message {
-    padding: 0.6rem 1rem;
-    border-radius: var(--radius-sm);
-    margin-bottom: 0.4rem;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.flash-message.success {
-    background: #1a3d28;
-    color: var(--color-like);
-}
-
-.flash-message.danger {
-    background: #3d1a1a;
-    color: var(--color-dislike);
-}
-
-.flash-message.info {
-    background: #1a2a3d;
-    color: var(--color-info);
-}
-
-/* --- Album grid --- */
-/* Reused on dashboard, search results, collection pages */
-.albums-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1.5rem;
-    padding: 1.5rem 0;
-}
-
-.album-card {
-    background: var(--color-surface);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    border: 1px solid var(--color-border);
-    transition: transform var(--transition), box-shadow var(--transition);
-}
-
-.album-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-glow);
-}
-
-.album-image {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-}
-
-.album-placeholder {
-    width: 100%;
-    height: 180px;
-    background: var(--color-surface-2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-muted);
-    font-size: 0.85rem;
-}
-
-.album-info {
-    padding: 0.9rem;
-    text-align: center;
-}
-
-.album-name {
-    font-size: 0.95rem;
-    font-weight: 700;
-    margin-bottom: 0.2rem;
-    color: var(--color-text);
-}
-
-.album-name a {
-    transition: color var(--transition);
-}
-
-.album-name a:hover {
-    color: var(--color-accent);
-}
-
-.album-artist,
-.artist {
-    font-size: 0.8rem;
-    color: var(--color-muted);
-    margin-bottom: 0.25rem;
-}
-
-/* --- Buttons --- */
-.btn-primary {
-    display: inline-block;
-    padding: 0.65rem 1.5rem;
-    background: var(--color-accent);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-pill);
-    font-weight: 700;
-    font-size: 0.9rem;
-    transition: background var(--transition), transform var(--transition);
-}
-
-.btn-primary:hover {
-    background: var(--color-accent-warm);
-    color: #121212;
-    transform: scale(1.03);
-}
-
-.btn-ghost {
-    background: transparent;
-    color: var(--color-muted);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    padding: 0.4rem 1rem;
-    font-size: 0.85rem;
-    transition: border-color var(--transition), color var(--transition);
-}
-
-.btn-ghost:hover {
-    border-color: var(--color-text);
-    color: var(--color-text);
-}
-
-/* --- Back link --- */
-.back-link {
-    display: inline-block;
-    margin-top: 0.75rem;
-    padding: 0.35rem 0.9rem;
-    background: var(--color-accent);
-    color: #fff;
-    border-radius: var(--radius-pill);
-    font-size: 0.85rem;
-    font-weight: 600;
-    transition: background var(--transition);
-}
-
-.back-link:hover {
-    background: var(--color-accent-warm);
-    color: #121212;
-}
-
-/* --- No results block --- */
-.no-results {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: var(--color-muted);
-}
-
-.no-results h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.75rem;
-    color: var(--color-text);
-}
-
-/* --- Modal overlay --- */
-/* Shared by both the rating modal and the collection modal */
-.modal-overlay {
-    display: none;
-    /* hidden by default         */
-    position: fixed;
-    inset: 0;
-    /* covers the full screen    */
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 500;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Add the .active class via JavaScript to show the modal */
-.modal-overlay.active {
-    display: flex;
-}
-
-/* Slide-in animation used by modal boxes */
-@keyframes modalIn {
-    from {
-        transform: scale(0.93);
-        opacity: 0;
-    }
-
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-/* --- Toast notification --- */
-/* The small confirmation bar that appears at the bottom of the screen */
-.toast {
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%) translateY(16px);
-    background: var(--color-like);
-    color: #fff;
-    padding: 0.6rem 1.4rem;
-    border-radius: var(--radius-pill);
-    font-size: 0.875rem;
-    font-weight: 600;
-    opacity: 0;
-    transition: opacity 0.3s, transform 0.3s;
-    z-index: 2000;
-    pointer-events: none;
-    /* does not block clicks     */
-}
-
-.toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
-/* --- Responsive --- */
-@media (max-width: 600px) {
-    .nav-bar {
-        padding: 0.75rem 1rem;
-    }
-
-    .nav-links {
-        gap: 0.75rem;
-    }
-
-    .albums-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 1rem;
-    }
-}
-
-/* ── Back navigation bar ── */
-/* Sits just below the nav bar on interior pages */
-
+/* ── Back bar ───────────────────────────────────────────────── */
 .back-bar {
-    background: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
-    padding: 0.55rem 2rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 2rem;
 }
 
 .back-bar-inner {
@@ -389,10 +144,242 @@ img {
 .back-link {
     font-size: 0.82rem;
     font-weight: 600;
-    color: var(--color-muted);
-    transition: color var(--transition);
+    color: var(--muted);
+    transition: color var(--ease);
 }
 
 .back-link:hover {
-    color: var(--color-text);
+    color: var(--text);
+}
+
+/* ── Flash messages ─────────────────────────────────────────── */
+.flash-container {
+    max-width: 1200px;
+    margin: 0.75rem auto 0;
+    padding: 0 2rem;
+}
+
+.flash-message {
+    padding: 0.55rem 1rem;
+    border-radius: var(--r-sm);
+    margin-bottom: 0.4rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.flash-message.success {
+    background: #1a3d28;
+    color: var(--like);
+}
+
+.flash-message.danger {
+    background: #3d1a1a;
+    color: var(--dislike);
+}
+
+.flash-message.info {
+    background: #1a2a3d;
+    color: var(--info);
+}
+
+/* ── Buttons ────────────────────────────────────────────────── */
+.btn-primary {
+    display: inline-block;
+    padding: 0.6rem 1.4rem;
+    border-radius: var(--r-pill);
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background var(--ease), transform var(--ease);
+}
+
+.btn-primary:hover {
+    background: var(--accent-warm);
+    color: #121212;
+    transform: translateY(-1px);
+}
+
+.btn-ghost {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: border-color var(--ease), color var(--ease);
+}
+
+.btn-ghost:hover {
+    border-color: var(--text);
+    color: var(--text);
+}
+
+/* ── Album card (shared) ────────────────────────────────────── */
+.album-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--ease), box-shadow var(--ease);
+}
+
+.album-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-glow);
+}
+
+.album-image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+}
+
+.album-placeholder {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.album-info {
+    padding: 0.7rem 0.75rem 0.85rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.album-name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+}
+
+.album-name a {
+    transition: color var(--ease);
+}
+
+.album-name a:hover {
+    color: var(--accent);
+}
+
+.album-artist {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 0.2rem;
+}
+
+.artist-link {
+    transition: color var(--ease);
+}
+
+.artist-link:hover {
+    color: var(--accent);
+}
+
+.release-year {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+}
+
+/* ── Albums grid ────────────────────────────────────────────── */
+.albums-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.25rem;
+}
+
+/* ── Empty state ────────────────────────────────────────────── */
+.no-results {
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.no-results h2 {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.no-results p {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* ── Modal overlay ──────────────────────────────────────────── */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ── Toast ──────────────────────────────────────────────────── */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.6rem 1.4rem;
+    border-radius: var(--r-pill);
+    font-size: 0.875rem;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--ease), transform var(--ease);
+    z-index: 900;
+    white-space: nowrap;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .nav-bar {
+        padding: 0 1rem;
+    }
+
+    .albums-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    }
 }

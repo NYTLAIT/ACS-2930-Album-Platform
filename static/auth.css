@@ -1,32 +1,23 @@
-/* =============================================================================
-   auth.css
-   Styles for the login and signup pages.
-   These pages are self-contained and do not use the main nav bar,
-   so this file does not import global.css — it defines its own variables
-   using the same token names for consistency.
-============================================================================= */
+/* auth.css — login and signup pages, self-contained */
 
 :root {
-    --color-bg: #121212;
-    --color-surface: #1e1e1e;
-    --color-surface-2: #2a2a2a;
-    --color-border: #333333;
-    --color-accent: #ff5f6d;
-    --color-accent-warm: #ffc371;
-    --color-text: #f0f0f0;
-    --color-muted: #888888;
-    --color-like: #4ade80;
-    --color-dislike: #f87171;
-    --color-info: #93c5fd;
-
-    --radius-sm: 8px;
-    --radius-md: 15px;
-    --radius-lg: 25px;
-    --radius-pill: 50px;
-
-    --font-body: 'Roboto', sans-serif;
-    --font-display: 'Montserrat', sans-serif;
-    --transition: 0.2s ease;
+    --bg: #121212;
+    --surface: #1e1e1e;
+    --surface-2: #2a2a2a;
+    --border: #333;
+    --accent: #ff5f6d;
+    --accent-warm: #ffc371;
+    --text: #f0f0f0;
+    --muted: #888;
+    --like: #4ade80;
+    --dislike: #f87171;
+    --info: #93c5fd;
+    --r-sm: 6px;
+    --r-md: 12px;
+    --r-pill: 50px;
+    --font-body: "Roboto", sans-serif;
+    --font-display: "Montserrat", sans-serif;
+    --ease: 0.2s ease;
 }
 
 *,
@@ -37,18 +28,13 @@
     padding: 0;
 }
 
-/* ── Page layout ── */
-/* The auth pages use a full-height gradient background */
-
-body.auth-body {
+body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     font-family: var(--font-body);
-    background: linear-gradient(135deg,
-            var(--color-accent),
-            var(--color-accent-warm));
-    color: var(--color-text);
+    background: linear-gradient(135deg, var(--accent), var(--accent-warm));
+    color: var(--text);
 }
 
 a {
@@ -56,10 +42,7 @@ a {
     color: inherit;
 }
 
-/* ── Navigation ── */
-
 .auth-nav {
-    width: 100%;
     display: flex;
     justify-content: flex-end;
     gap: 1.5rem;
@@ -72,14 +55,12 @@ a {
     font-size: 0.875rem;
     font-weight: 600;
     color: #fff;
-    transition: opacity var(--transition);
+    transition: opacity var(--ease);
 }
 
 .auth-nav a:hover {
     opacity: 0.7;
 }
-
-/* ── Card container ── */
 
 .auth-main {
     flex: 1;
@@ -90,9 +71,9 @@ a {
 }
 
 .auth-card {
-    background: var(--color-surface);
+    background: var(--surface);
     padding: 2.75rem 2.5rem;
-    border-radius: var(--radius-lg);
+    border-radius: 20px;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
     width: 100%;
     max-width: 440px;
@@ -102,18 +83,16 @@ a {
 .auth-card h1 {
     font-family: var(--font-display);
     font-size: 1.8rem;
-    color: var(--color-accent);
+    color: var(--accent);
     margin-bottom: 0.4rem;
 }
 
 .auth-subtitle {
     font-size: 0.875rem;
-    color: var(--color-muted);
+    color: var(--muted);
     margin-bottom: 1.75rem;
     line-height: 1.5;
 }
-
-/* ── Flash messages ── */
 
 .flash-list {
     list-style: none;
@@ -123,7 +102,7 @@ a {
 
 .flash {
     padding: 0.5rem 0.9rem;
-    border-radius: var(--radius-sm);
+    border-radius: var(--r-sm);
     margin-bottom: 0.4rem;
     font-size: 0.85rem;
     font-weight: 500;
@@ -131,20 +110,18 @@ a {
 
 .flash-success {
     background: #1a3d28;
-    color: var(--color-like);
+    color: var(--like);
 }
 
 .flash-danger {
     background: #3d1a1a;
-    color: var(--color-dislike);
+    color: var(--dislike);
 }
 
 .flash-info {
     background: #1a2a3d;
-    color: var(--color-info);
+    color: var(--info);
 }
-
-/* ── Form fields ── */
 
 .auth-form {
     text-align: left;
@@ -158,32 +135,28 @@ a {
     display: block;
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--color-text);
     margin-bottom: 0.4rem;
 }
 
 .form-input {
     width: 100%;
     padding: 0.65rem 1rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
-    color: var(--color-text);
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
     font-size: 0.95rem;
-    font-family: var(--font-body);
     outline: none;
-    transition: border-color var(--transition);
+    transition: border-color var(--ease);
 }
 
 .form-input:focus {
-    border-color: var(--color-accent);
+    border-color: var(--accent);
 }
 
 .form-input::placeholder {
-    color: var(--color-muted);
+    color: var(--muted);
 }
-
-/* ── Field-level validation errors ── */
 
 .field-errors {
     list-style: none;
@@ -192,10 +165,8 @@ a {
 
 .field-errors li {
     font-size: 0.8rem;
-    color: var(--color-dislike);
+    color: var(--dislike);
 }
-
-/* ── Submit button ── */
 
 .form-actions {
     margin-top: 0.5rem;
@@ -204,43 +175,37 @@ a {
 .btn-submit {
     width: 100%;
     padding: 0.8rem 1rem;
-    border-radius: var(--radius-pill);
+    border-radius: var(--r-pill);
     border: none;
-    font-family: var(--font-body);
     font-weight: 700;
     font-size: 0.95rem;
     cursor: pointer;
-    background: var(--color-accent);
+    background: var(--accent);
     color: #fff;
-    transition: background var(--transition), transform var(--transition);
+    transition: background var(--ease), transform var(--ease);
 }
 
 .btn-submit:hover {
-    background: var(--color-accent-warm);
+    background: var(--accent-warm);
     color: #121212;
     transform: scale(1.02);
 }
 
-/* ── Switch link (log in / sign up) ── */
-
 .auth-switch {
     margin-top: 1.5rem;
     font-size: 0.875rem;
-    color: var(--color-muted);
-    text-align: center;
+    color: var(--muted);
 }
 
 .auth-switch a {
-    color: var(--color-accent);
+    color: var(--accent);
     font-weight: 600;
-    transition: color var(--transition);
+    transition: color var(--ease);
 }
 
 .auth-switch a:hover {
-    color: var(--color-accent-warm);
+    color: var(--accent-warm);
 }
-
-/* ── Responsive ── */
 
 @media (max-width: 500px) {
     .auth-card {
