@@ -200,7 +200,7 @@ def create_app(config_class=DevelopmentConfig):
         public_id_rows = (
             db.session.query(collection_albums.c.album_id)
             .join(Collection, Collection.id == collection_albums.c.collection_id)
-            .filter(Collection.is_public.is_(True))
+            # .filter(Collection.is_public.is_(True))
             .distinct()
             .all()
         )
@@ -844,11 +844,12 @@ def create_app(config_class=DevelopmentConfig):
     @login_required
     def search():
         query  = request.args.get("query", "").strip()
+        offset = int(request.args.get("offset", 0)) 
         albums = []
 
         if query:
             try:
-                results = app.spotify.search(q=query, type="album", limit=10)
+                results = app.spotify.search(q=query, type="album", limit=10, offset=offset)
                 for item in results.get("albums", {}).get("items", []):
                     albums.append({
                         "spotify_id":   item.get("id", ""),
@@ -891,6 +892,8 @@ def create_app(config_class=DevelopmentConfig):
             albums=albums,
             query=query,
             collections=user_collections,
+            offset=offset,         
+            has_more=len(albums)==10
         )
 
     # ─────────────────────────────────────────────────────────────────────────

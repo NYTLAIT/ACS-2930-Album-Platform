@@ -326,3 +326,22 @@
     background: var(--accent-warm);
     color: #121212;
 }
+
+.load-more-wrap {
+    text-align: center;
+    padding: 2rem;
+}
+
+.btn-secondary {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 0.6rem 1.4rem;
+    border-radius: var(--r-pill);
+    font-weight: 600;
+    transition: background var(--ease);
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+}

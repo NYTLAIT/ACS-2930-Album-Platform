@@ -109,6 +109,21 @@
             </div>
             {% endfor %}
         </div>
+
+        {# ── Load More ── #}
+        <div class="load-more-wrap">
+            {% if offset > 0 %}
+            <a href="{{ url_for('search', query=query, offset=offset-12) }}" class="btn-secondary load-more-btn">
+                &larr; Previous
+            </a>
+            {% endif %}
+            {% if has_more %}
+            <a href="{{ url_for('search', query=query, offset=offset+12) }}" class="btn-primary load-more-btn">
+                Load More &rarr;
+            </a>
+            {% endif %}
+        </div>
+
         {% elif query %}
         <div class="no-results">
             <h2>No albums found</h2>
