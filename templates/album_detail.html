@@ -14,6 +14,79 @@
 
 <body>
 
+    {# ════════════════════════════════════════════
+    COMMENT MACRO
+    Renders a comment and its replies recursively.
+    depth controls indent level (max visual depth: 3).
+    ════════════════════════════════════════════ #}
+    {% macro render_comment(comment, user_votes, album_id, depth) %}
+    {# Split replies: pinned (score >= 20) always show, top 4 normal show, rest collapse #}
+    {% set pinned = comment.replies | selectattr('score', 'ge', 20) | sort(attribute='score', reverse=true) | list %}
+    {% set normal = comment.replies | rejectattr('score', 'ge', 20) | sort(attribute='score', reverse=true) | list %}
+    {% set visible = normal[:4] %}
+    {% set overflow = normal[4:] | sort(attribute='created_at') | list %}
+    
+    <div class="comment-block {% if depth > 0 %}comment-reply{% endif %} {% if depth > 3 %}comment-reply-capped{% endif %}">
+        <div class="comment-inner" id="comment-{{ comment.id }}">
+            <div class="comment-header">
+                <span class="comment-author">{{ comment.author.username }}</span>
+                <span class="comment-time">{{ comment.created_at.strftime('%b %d, %Y') }}</span>
+            </div>
+            <p class="comment-body">{{ comment.content }}</p>
+            <div class="comment-footer">
+                {# Upvote #}
+                <button class="btn-vote btn-upvote {% if user_votes.get(comment.id) == 1 %}vote-active-up{% endif %}"
+                    data-comment-id="{{ comment.id }}" data-value="1" aria-label="Upvote">&#9650;</button>
+                <span
+                    class="vote-score {% if comment.score > 0 %}score-positive{% elif comment.score < 0 %}score-negative{% endif %}"
+                    id="score-{{ comment.id }}">{{ comment.score }}</span>
+                {# Downvote #}
+                <button class="btn-vote btn-downvote {% if user_votes.get(comment.id) == -1 %}vote-active-down{% endif %}"
+                    data-comment-id="{{ comment.id }}" data-value="-1" aria-label="Downvote">&#9660;</button>
+                {# Reply toggle #}
+                <button class="btn-reply-toggle" data-comment-id="{{ comment.id }}">Reply</button>
+            </div>
+    
+            {# Inline reply form #}
+            <div class="reply-form-wrap" id="reply-form-{{ comment.id }}">
+                <form method="POST" action="{{ url_for('post_comment') }}" class="reply-form comment-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="album_id" value="{{ album_id }}">
+                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                    <textarea name="content" class="comment-input" rows="2" placeholder="Write a reply…"
+                        required></textarea>
+                    <div class="comment-form-actions">
+                        <button type="submit" class="btn-post-comment">Reply</button>
+                        <button type="button" class="btn-cancel-reply" data-comment-id="{{ comment.id }}">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    
+        {# Replies #}
+        {% if pinned or visible or overflow %}
+        <div class="replies-wrap">
+            {% for reply in pinned %}
+            {{ render_comment(reply, user_votes, album_id, depth + 1) }}
+            {% endfor %}
+            {% for reply in visible %}
+            {{ render_comment(reply, user_votes, album_id, depth + 1) }}
+            {% endfor %}
+            {% if overflow %}
+            <div class="overflow-replies" id="overflow-{{ comment.id }}">
+                {% for reply in overflow %}
+                {{ render_comment(reply, user_votes, album_id, depth + 1) }}
+                {% endfor %}
+            </div>
+            <button class="btn-show-more" data-overflow-id="{{ comment.id }}">
+                Show {{ overflow|length }} more {{ 'reply' if overflow|length == 1 else 'replies' }}
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endmacro %}
+
     <nav class="nav-bar">
         <div class="logo">Ecouter</div>
         <div class="nav-links">
@@ -220,82 +293,6 @@
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-    {# ════════════════════════════════════════════
-    COMMENT MACRO
-    Renders a comment and its replies recursively.
-    depth controls indent level (max visual depth: 3).
-    ════════════════════════════════════════════ #}
-    {% macro render_comment(comment, user_votes, album_id, depth) %}
-    {# Split replies: pinned (score >= 20) always show, top 4 normal show, rest collapse #}
-    {% set pinned = comment.replies | selectattr('score', 'ge', 20) | sort(attribute='score', reverse=true) | list %}
-    {% set normal = comment.replies | rejectattr('score', 'ge', 20) | sort(attribute='score', reverse=true) | list %}
-    {% set visible = normal[:4] %}
-    {% set overflow = normal[4:] | sort(attribute='created_at') | list %}
-
-    <div
-        class="comment-block {% if depth > 0 %}comment-reply{% endif %} {% if depth > 3 %}comment-reply-capped{% endif %}">
-        <div class="comment-inner" id="comment-{{ comment.id }}">
-            <div class="comment-header">
-                <span class="comment-author">{{ comment.author.username }}</span>
-                <span class="comment-time">{{ comment.created_at.strftime('%b %d, %Y') }}</span>
-            </div>
-            <p class="comment-body">{{ comment.content }}</p>
-            <div class="comment-footer">
-                {# Upvote #}
-                <button class="btn-vote btn-upvote {% if user_votes.get(comment.id) == 1 %}vote-active-up{% endif %}"
-                    data-comment-id="{{ comment.id }}" data-value="1" aria-label="Upvote">&#9650;</button>
-                <span
-                    class="vote-score {% if comment.score > 0 %}score-positive{% elif comment.score < 0 %}score-negative{% endif %}"
-                    id="score-{{ comment.id }}">{{ comment.score }}</span>
-                {# Downvote #}
-                <button
-                    class="btn-vote btn-downvote {% if user_votes.get(comment.id) == -1 %}vote-active-down{% endif %}"
-                    data-comment-id="{{ comment.id }}" data-value="-1" aria-label="Downvote">&#9660;</button>
-                {# Reply toggle #}
-                <button class="btn-reply-toggle" data-comment-id="{{ comment.id }}">Reply</button>
-            </div>
-
-            {# Inline reply form #}
-            <div class="reply-form-wrap" id="reply-form-{{ comment.id }}">
-                <form method="POST" action="{{ url_for('post_comment') }}" class="reply-form comment-form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <input type="hidden" name="album_id" value="{{ album_id }}">
-                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
-                    <textarea name="content" class="comment-input" rows="2" placeholder="Write a reply…"
-                        required></textarea>
-                    <div class="comment-form-actions">
-                        <button type="submit" class="btn-post-comment">Reply</button>
-                        <button type="button" class="btn-cancel-reply"
-                            data-comment-id="{{ comment.id }}">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        {# Replies #}
-        {% if pinned or visible or overflow %}
-        <div class="replies-wrap">
-            {% for reply in pinned %}
-            {{ render_comment(reply, user_votes, album_id, depth + 1) }}
-            {% endfor %}
-            {% for reply in visible %}
-            {{ render_comment(reply, user_votes, album_id, depth + 1) }}
-            {% endfor %}
-            {% if overflow %}
-            <div class="overflow-replies" id="overflow-{{ comment.id }}">
-                {% for reply in overflow %}
-                {{ render_comment(reply, user_votes, album_id, depth + 1) }}
-                {% endfor %}
-            </div>
-            <button class="btn-show-more" data-overflow-id="{{ comment.id }}">
-                Show {{ overflow|length }} more {{ 'reply' if overflow|length == 1 else 'replies' }}
-            </button>
-            {% endif %}
-        </div>
-        {% endif %}
-    </div>
-    {% endmacro %}
 
     <script>
         const RATE_URL = "{{ url_for('rate_album') }}";
