@@ -1,18 +1,14 @@
-{# templates/create_collection.html #}
-{#
-Create a new collection.
-No variables passed — just a simple form that POSTs to /create_collection.
-#}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Collection | AlbumRank</title>
+    <title>Collections | AlbumRank</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='collections.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600;700&display=swap"
         rel="stylesheet">
 </head>
 
@@ -28,10 +24,9 @@ No variables passed — just a simple form that POSTs to /create_collection.
         </div>
     </nav>
 
-    {# -- Back navigation -- #}
     <div class="back-bar">
         <div class="back-bar-inner">
-            <a href="{{ url_for('collections') }}" class="back-link">&#8592; Collections</a>
+            <a href="{{ url_for('dashboard') }}" class="back-link">&#8592; Dashboard</a>
         </div>
     </div>
 
@@ -45,47 +40,183 @@ No variables passed — just a simple form that POSTs to /create_collection.
     {% endif %}
     {% endwith %}
 
-    <section class="page-header">
+    <header class="page-header">
         <div class="page-header-inner">
             <div class="page-header-left">
-                <h1>New Collection</h1>
-                <p>Organise your albums into a curated collection.</p>
+                <h1>Your Collections</h1>
+                <p>{{ collections|length }} {{ 'collection' if collections|length == 1 else 'collections' }}</p>
             </div>
-            <a href="{{ url_for('collections') }}" class="back-link">Back to Collections</a>
+            <div class="header-actions">
+                <a href="{{ url_for('create_collection') }}" class="btn-primary">+ New Collection</a>
+            </div>
         </div>
-    </section>
+    </header>
 
     <section class="collections-section">
-        <div class="create-card">
-            <form method="POST" class="edit-form">
+        {% if collections %}
+        <div class="collections-grid">
+            {% for col in collections %}
+            <div class="collection-card">
 
-                <div class="form-group">
-                    <label class="form-label" for="name">Name</label>
-                    <input type="text" id="name" name="name" class="form-input" placeholder="e.g. Late Night Listens"
-                        maxlength="255" required autofocus>
+                {# Cover strip — up to 4 album thumbnails #}
+                <div class="cover-strip">
+                    {% for album in col.albums[:4] %}
+                    {% if album.image_url %}
+                    <img src="{{ album.image_url }}" alt="" class="cover-thumb">
+                    {% else %}
+                    <div class="cover-thumb cover-thumb-empty"></div>
+                    {% endif %}
+                    {% endfor %}
+                    {% for _ in range([4 - col.albums|length, 0]|max) %}
+                    <div class="cover-thumb cover-thumb-empty"></div>
+                    {% endfor %}
                 </div>
 
+                <div class="card-top">
+                    <div class="card-title-row">
+                        <h3 class="card-name">{{ col.name }}</h3>
+                        <span class="status-badge {% if col.is_public %}badge-public{% else %}badge-private{% endif %}">
+                            {{ 'Public' if col.is_public else 'Private' }}
+                        </span>
+                    </div>
+                    {% if col.description %}
+                    <p class="card-description">{{ col.description }}</p>
+                    {% endif %}
+                    <p class="card-meta">
+                        {{ col.albums|length }} {{ 'album' if col.albums|length == 1 else 'albums' }}
+                        &middot; Created {{ col.created_at.strftime('%b %Y') }}
+                    </p>
+                </div>
+
+                <div class="card-actions">
+                    <a href="{{ url_for('view_collection', collection_id=col.id) }}" class="btn-view">View</a>
+                    <button class="btn-edit" data-id="{{ col.id }}" data-name="{{ col.name }}"
+                        data-description="{{ col.description or '' }}"
+                        data-public="{{ 'true' if col.is_public else 'false' }}">
+                        Edit
+                    </button>
+                    <button class="btn-delete" data-id="{{ col.id }}" data-name="{{ col.name }}">
+                        Delete
+                    </button>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="no-results">
+            <h2>No collections yet</h2>
+            <p>Create your first collection to start organising your albums.</p>
+            <a href="{{ url_for('create_collection') }}" class="btn-primary btn-mt">
+                Create a Collection
+            </a>
+        </div>
+        {% endif %}
+    </section>
+
+    {# ── Edit modal ── #}
+    <div class="modal-overlay" id="editModal">
+        <div class="edit-modal-box" role="dialog" aria-modal="true" aria-label="Edit Collection">
+            <div class="modal-header">
+                <h3>Edit Collection</h3>
+                <button class="btn-modal-close" id="closeEditModal" aria-label="Close">&times;</button>
+            </div>
+            <form method="POST" id="editForm" class="edit-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-group">
-                    <label class="form-label" for="description">
+                    <label class="form-label" for="editName">Name</label>
+                    <input type="text" id="editName" name="name" class="form-input" required maxlength="255">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="editDesc">
                         Description <span class="label-optional">(optional)</span>
                     </label>
-                    <textarea id="description" name="description" class="form-input form-textarea" rows="3"
-                        placeholder="What is this collection about?" maxlength="500"></textarea>
+                    <textarea id="editDesc" name="description" class="form-input form-textarea"
+                        maxlength="500"></textarea>
                 </div>
-
-                <div class="form-group form-group-inline">
-                    <label class="form-label" for="is_public">Make this collection public</label>
-                    <input type="checkbox" id="is_public" name="is_public" class="form-checkbox">
+                <div class="form-group">
+                    <div class="form-group-inline">
+                        <label class="form-label" for="editPublic">Make this collection public</label>
+                        <input type="checkbox" id="editPublic" name="is_public" class="form-checkbox">
+                    </div>
                 </div>
-
                 <div class="form-actions">
-                    <button type="submit" class="btn-primary">Create Collection</button>
-                    <a href="{{ url_for('collections') }}" class="btn-ghost">Cancel</a>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                    <button type="button" class="btn-ghost" id="cancelEdit">Cancel</button>
                 </div>
-
             </form>
         </div>
-    </section>
+    </div>
+
+    {# ── Delete modal ── #}
+    <div class="modal-overlay" id="deleteModal">
+        <div class="edit-modal-box" role="dialog" aria-modal="true" aria-label="Delete Collection">
+            <div class="modal-header">
+                <h3>Delete Collection</h3>
+                <button class="btn-modal-close" id="closeDeleteModal" aria-label="Close">&times;</button>
+            </div>
+            <p class="delete-warning">
+                Are you sure you want to delete <strong id="deleteColName"></strong>?
+                This cannot be undone. Albums will not be deleted.
+            </p>
+            <form method="POST" id="deleteForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-actions form-actions-padded">
+                    <button type="submit" class="btn-danger">Delete</button>
+                    <button type="button" class="btn-ghost" id="cancelDelete">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ── Edit modal ──────────────────────────────────────────────
+        const editModal = document.getElementById("editModal");
+        const editForm = document.getElementById("editForm");
+
+        document.querySelectorAll(".btn-edit").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const id = btn.dataset.id;
+                const name = btn.dataset.name;
+                const desc = btn.dataset.description;
+                const pub = btn.dataset.public === "true";
+
+                editForm.action = `/edit_collection/${id}`;
+                document.getElementById("editName").value = name;
+                document.getElementById("editDesc").value = desc;
+                document.getElementById("editPublic").checked = pub;
+
+                editModal.classList.add("active");
+            });
+        });
+
+        function closeEdit() { editModal.classList.remove("active"); }
+        document.getElementById("closeEditModal").addEventListener("click", closeEdit);
+        document.getElementById("cancelEdit").addEventListener("click", closeEdit);
+        editModal.addEventListener("click", e => { if (e.target === editModal) closeEdit(); });
+
+        // ── Delete modal ─────────────────────────────────────────────
+        const deleteModal = document.getElementById("deleteModal");
+        const deleteForm = document.getElementById("deleteForm");
+
+        document.querySelectorAll(".btn-delete").forEach(btn => {
+            btn.addEventListener("click", () => {
+                deleteForm.action = `/delete_collection/${btn.dataset.id}`;
+                document.getElementById("deleteColName").textContent = `"${btn.dataset.name}"`;
+                deleteModal.classList.add("active");
+            });
+        });
+
+        function closeDelete() { deleteModal.classList.remove("active"); }
+        document.getElementById("closeDeleteModal").addEventListener("click", closeDelete);
+        document.getElementById("cancelDelete").addEventListener("click", closeDelete);
+        deleteModal.addEventListener("click", e => { if (e.target === deleteModal) closeDelete(); });
+
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape") { closeEdit(); closeDelete(); }
+        });
+    </script>
 
 </body>
 

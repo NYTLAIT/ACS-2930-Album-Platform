@@ -1,8 +1,3 @@
-{# templates/create_collection.html #}
-{#
-Create a new collection.
-No variables passed — just a simple form that POSTs to /create_collection.
-#}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,7 +7,8 @@ No variables passed — just a simple form that POSTs to /create_collection.
     <title>New Collection | AlbumRank</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='collections.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600;700&display=swap"
         rel="stylesheet">
 </head>
 
@@ -22,13 +18,12 @@ No variables passed — just a simple form that POSTs to /create_collection.
         <div class="logo">AlbumRank</div>
         <div class="nav-links">
             <a href="{{ url_for('dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('collections') }}" class="nav-active">Collections</a>
+            <a href="{{ url_for('collections') }}">Collections</a>
             <a href="{{ url_for('search') }}">Search</a>
             <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
         </div>
     </nav>
 
-    {# -- Back navigation -- #}
     <div class="back-bar">
         <div class="back-bar-inner">
             <a href="{{ url_for('collections') }}" class="back-link">&#8592; Collections</a>
@@ -45,44 +40,45 @@ No variables passed — just a simple form that POSTs to /create_collection.
     {% endif %}
     {% endwith %}
 
-    <section class="page-header">
+    <header class="page-header">
         <div class="page-header-inner">
             <div class="page-header-left">
                 <h1>New Collection</h1>
-                <p>Organise your albums into a curated collection.</p>
+                <p>Organise albums into a named collection.</p>
             </div>
-            <a href="{{ url_for('collections') }}" class="back-link">Back to Collections</a>
         </div>
-    </section>
+    </header>
 
     <section class="collections-section">
         <div class="create-card">
             <form method="POST" class="edit-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
                 <div class="form-group">
                     <label class="form-label" for="name">Name</label>
-                    <input type="text" id="name" name="name" class="form-input" placeholder="e.g. Late Night Listens"
-                        maxlength="255" required autofocus>
+                    <input type="text" id="name" name="name" class="form-input" required maxlength="255" autofocus
+                        placeholder="e.g. Favourites, Road Trip, 90s Classics">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label" for="description">
                         Description <span class="label-optional">(optional)</span>
                     </label>
-                    <textarea id="description" name="description" class="form-input form-textarea" rows="3"
-                        placeholder="What is this collection about?" maxlength="500"></textarea>
+                    <textarea id="description" name="description" class="form-input form-textarea" maxlength="500"
+                        placeholder="What is this collection for?"></textarea>
                 </div>
 
-                <div class="form-group form-group-inline">
-                    <label class="form-label" for="is_public">Make this collection public</label>
-                    <input type="checkbox" id="is_public" name="is_public" class="form-checkbox">
+                <div class="form-group">
+                    <div class="form-group-inline">
+                        <label class="form-label" for="is_public">Make this collection public</label>
+                        <input type="checkbox" id="is_public" name="is_public" class="form-checkbox">
+                    </div>
                 </div>
 
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Create Collection</button>
                     <a href="{{ url_for('collections') }}" class="btn-ghost">Cancel</a>
                 </div>
-
             </form>
         </div>
     </section>

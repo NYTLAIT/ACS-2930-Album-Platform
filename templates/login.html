@@ -1,9 +1,3 @@
-<!-- {templates/login.html #}
-
-Login page.
-Variables passed from the login route in ecouter.py:
-form — LoginForm instance (email, password, submit fields) -->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,24 +6,23 @@ form — LoginForm instance (email, password, submit fields) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log In | AlbumRank</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600;700&display=swap"
         rel="stylesheet">
 </head>
 
-<body class="auth-body">
+<body>
 
     <nav class="auth-nav">
         <a href="{{ url_for('index') }}">Home</a>
-        <a href="{{ url_for('signup') }}">Create account</a>
+        <a href="{{ url_for('signup') }}">Sign Up</a>
     </nav>
 
     <main class="auth-main">
-        <section class="auth-card">
+        <div class="auth-card">
+            <h1>AlbumRank</h1>
+            <p class="auth-subtitle">Log in to your account</p>
 
-            <h1>Welcome back</h1>
-            <p class="auth-subtitle">Sign in to access your album collections.</p>
-
-            {# Flash messages — shown when login fails or after logout #}
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             <ul class="flash-list">
@@ -40,49 +33,39 @@ form — LoginForm instance (email, password, submit fields) -->
             {% endif %}
             {% endwith %}
 
-            <form method="POST" class="auth-form">
-                {#
-                form.hidden_tag() outputs a hidden CSRF token.
-                This must be included in every form or Flask-WTF will reject the submission.
-                #}
+            <form method="POST" class="auth-form" novalidate>
                 {{ form.hidden_tag() }}
 
                 <div class="form-group">
-                    {{ form.email.label(class_="form-label") }}
-                    {{ form.email(class_="form-input", placeholder="you@example.com") }}
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-input", placeholder="you@example.com", autocomplete="email") }}
                     {% if form.email.errors %}
                     <ul class="field-errors">
-                        {% for error in form.email.errors %}
-                        <li>{{ error }}</li>
-                        {% endfor %}
+                        {% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}
                     </ul>
                     {% endif %}
                 </div>
 
                 <div class="form-group">
-                    {{ form.password.label(class_="form-label") }}
-                    {{ form.password(class_="form-input", placeholder="Your password") }}
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-input", placeholder="Your password", autocomplete="current-password")
+                    }}
                     {% if form.password.errors %}
                     <ul class="field-errors">
-                        {% for error in form.password.errors %}
-                        <li>{{ error }}</li>
-                        {% endfor %}
+                        {% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}
                     </ul>
                     {% endif %}
                 </div>
 
                 <div class="form-actions">
-                    {{ form.submit(class_="btn-submit") }}
+                    {{ form.submit(class="btn-submit") }}
                 </div>
-
             </form>
 
             <p class="auth-switch">
-                Do not have an account?
-                <a href="{{ url_for('signup') }}">Sign up</a>
+                Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a>
             </p>
-
-        </section>
+        </div>
     </main>
 
 </body>

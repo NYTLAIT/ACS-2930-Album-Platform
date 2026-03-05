@@ -105,6 +105,7 @@
     margin-bottom: 0.35rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -408,4 +409,15 @@
     .collections-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Utility: button with top margin (used in empty states) */
+.btn-mt {
+    margin-top: 1rem;
+    display: inline-block;
+}
+
+/* Delete modal form actions with bottom padding */
+.form-actions-padded {
+    padding: 0 1.1rem 1.1rem;
 }

@@ -635,3 +635,15 @@
         margin-left: 0.75rem;
     }
 }
+
+/* Comment depth cap — stops indenting past level 3 */
+.comment-reply-capped {
+    margin-left: 0;
+}
+
+/* Notes save row */
+.notes-save-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

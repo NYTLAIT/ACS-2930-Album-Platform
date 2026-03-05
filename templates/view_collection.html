@@ -1,12 +1,3 @@
-{# templates/view_collection.html #}
-{#
-View a single collection and all its albums.
-
-Variables passed from the view_collection route in ecouter.py:
-collection — Playlist object
-ratings — dict of { album_id: rating } for the current user
-is_owner — True if the current user owns this collection
-#}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,7 +7,8 @@ is_owner — True if the current user owns this collection
     <title>{{ collection.name }} | AlbumRank</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='global.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='collections.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600;700&display=swap"
         rel="stylesheet">
 </head>
 
@@ -26,13 +18,12 @@ is_owner — True if the current user owns this collection
         <div class="logo">AlbumRank</div>
         <div class="nav-links">
             <a href="{{ url_for('dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('collections') }}" class="nav-active">Collections</a>
+            <a href="{{ url_for('collections') }}">Collections</a>
             <a href="{{ url_for('search') }}">Search</a>
             <a href="{{ url_for('logout') }}" class="logout-btn">Log Out</a>
         </div>
     </nav>
 
-    {# -- Back navigation -- #}
     <div class="back-bar">
         <div class="back-bar-inner">
             <a href="{{ url_for('collections') }}" class="back-link">&#8592; Collections</a>
@@ -49,8 +40,7 @@ is_owner — True if the current user owns this collection
     {% endif %}
     {% endwith %}
 
-    {# ── Collection header ── #}
-    <section class="page-header">
+    <header class="page-header">
         <div class="page-header-inner">
             <div class="page-header-left">
                 <div class="collection-title-row">
@@ -60,163 +50,113 @@ is_owner — True if the current user owns this collection
                         {{ 'Public' if collection.is_public else 'Private' }}
                     </span>
                 </div>
-
                 {% if collection.description %}
                 <p class="collection-desc">{{ collection.description }}</p>
                 {% endif %}
-
                 <p class="page-header-meta">
-                    {{ collection.albums | length }}
-                    {{ 'album' if collection.albums | length == 1 else 'albums' }}
-                    &middot;
-                    Created {{ collection.created_at.strftime('%b %Y') }}
+                    {{ collection.albums|length }} {{ 'album' if collection.albums|length == 1 else 'albums' }}
+                    &middot; Created {{ collection.created_at.strftime('%b %d, %Y') }}
                 </p>
             </div>
-
+            {% if is_owner %}
             <div class="header-actions">
-                <a href="{{ url_for('collections') }}" class="back-link">Back to Collections</a>
-                {% if is_owner %}
-                <a href="{{ url_for('search') }}" class="btn-primary">Add Albums</a>
-                {% endif %}
+                <a href="{{ url_for('search') }}" class="btn-primary">+ Add Albums</a>
             </div>
+            {% endif %}
         </div>
-    </section>
+    </header>
 
-    {# ── Album grid ── #}
     <section class="collections-section">
-
         {% if collection.albums %}
-        <div class="albums-grid">
+        <div class="albums-grid" id="albumGrid">
             {% for album in collection.albums %}
-            {% set user_rating = ratings.get(album.id) %}
-
-            <div class="album-card" id="album-card-{{ album.id }}">
-
-                <a href="{{ url_for('album_detail', album_id=album.id) }}">
-                    {% if album.image_url %}
-                    <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-image">
-                    {% else %}
-                    <div class="album-placeholder">No cover</div>
-                    {% endif %}
-                </a>
-
+            <div class="album-card" id="col-card-{{ album.id }}">
+                {% if album.image_url %}
+                <img src="{{ album.image_url }}" alt="{{ album.name }}" class="album-image">
+                {% else %}
+                <div class="album-placeholder">No cover</div>
+                {% endif %}
                 <div class="album-info">
-
-                    <h3 class="album-name">
-                        <a href="{{ url_for('album_detail', album_id=album.id) }}">
-                            {{ album.name }}
-                        </a>
-                    </h3>
-
-                    {% if album.artist_id %}
+                    <p class="album-name">
+                        <a href="{{ url_for('album_detail', album_id=album.id) }}">{{ album.name }}</a>
+                    </p>
                     <p class="album-artist">
+                        {% if album.artist_id %}
                         <a href="{{ url_for('artist_page', spotify_artist_id=album.artist_id) }}" class="artist-link">
                             {{ album.artist }}
                         </a>
+                        {% else %}
+                        {{ album.artist }}
+                        {% endif %}
                     </p>
-                    {% else %}
-                    <p class="album-artist">{{ album.artist }}</p>
-                    {% endif %}
-
                     {% if album.release_date %}
                     <p class="release-year">{{ album.release_date[:4] }}</p>
                     {% endif %}
 
-                    {# Like / Dislike buttons — only shown to the owner #}
                     {% if is_owner %}
                     <div class="rating-buttons">
-                        <button class="btn-rate btn-like {% if user_rating == 1 %}active{% endif %}"
-                            data-album-id="{{ album.id }}" data-rating="1" aria-label="Like {{ album.name }}">
-                            Like
-                        </button>
-                        <button class="btn-rate btn-dislike {% if user_rating == -1 %}active{% endif %}"
-                            data-album-id="{{ album.id }}" data-rating="-1" aria-label="Dislike {{ album.name }}">
-                            Dislike
-                        </button>
+                        <button class="btn-rate btn-like {% if ratings.get(album.id) == 1 %}active{% endif %}"
+                            data-album-id="{{ album.id }}" data-rating="1">Like</button>
+                        <button class="btn-rate btn-dislike {% if ratings.get(album.id) == -1 %}active{% endif %}"
+                            data-album-id="{{ album.id }}" data-rating="-1">Dislike</button>
                     </div>
                     {% else %}
-                    {# Visitor view — show rating state but no buttons #}
                     <div class="rating-readonly">
-                        {% if user_rating == 1 %}
+                        {% if ratings.get(album.id) == 1 %}
                         <span class="rating-badge rating-liked">Liked</span>
-                        {% elif user_rating == -1 %}
+                        {% elif ratings.get(album.id) == -1 %}
                         <span class="rating-badge rating-disliked">Disliked</span>
                         {% endif %}
                     </div>
                     {% endif %}
-
                 </div>
             </div>
             {% endfor %}
         </div>
-
         {% else %}
         <div class="no-results">
-            <h2>No albums in this collection</h2>
+            <h2>No albums yet</h2>
             {% if is_owner %}
-            <p>
-                <a href="{{ url_for('search') }}">Search for albums</a>
-                to add them here.
-            </p>
+            <p>Search for albums and add them to this collection.</p>
+            <a href="{{ url_for('search') }}" class="btn-primary btn-mt">
+                Search Albums
+            </a>
             {% else %}
             <p>This collection is empty.</p>
             {% endif %}
         </div>
         {% endif %}
-
     </section>
 
-    {# ── Toast ── #}
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    {# ── JavaScript — rating buttons ── #}
     {% if is_owner %}
     <script>
-        document.querySelectorAll('.btn-rate').forEach(function (button) {
-            button.addEventListener('click', function () {
-                let albumId = button.getAttribute('data-album-id');
-                let rating = button.getAttribute('data-rating');
+        document.querySelectorAll(".btn-rate").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const albumId = btn.dataset.albumId;
+                const rating = btn.dataset.rating;
+                const body = new FormData();
+                body.append("album_id", albumId);
+                body.append("rating", rating);
 
-                let formData = new FormData();
-                formData.append('album_id', albumId);
-                formData.append('rating', rating);
-
-                fetch('{{ url_for("rate_album") }}', {
-                    method: 'POST',
-                    body: formData
-                })
-                    .then(function (r) { return r.json(); })
-                    .then(function (data) {
-                        updateRatingButtons(albumId, data.rating);
-
-                        if (data.status === 'removed') {
-                            showToast('Rating removed');
-                        } else if (data.rating === 1) {
-                            showToast('Liked');
-                        } else {
-                            showToast('Disliked');
-                        }
+                fetch("{{ url_for('rate_album') }}", { method: "POST", body })
+                    .then(r => r.json())
+                    .then(data => {
+                        const card = document.getElementById(`col-card-${albumId}`);
+                        card.querySelector(".btn-like").classList.toggle("active", data.rating === 1);
+                        card.querySelector(".btn-dislike").classList.toggle("active", data.rating === -1);
+                        showToast(data.status === "removed" ? "Rating removed" : data.rating === 1 ? "Liked" : "Disliked");
                     })
-                    .catch(function () {
-                        showToast('Something went wrong. Please try again.');
-                    });
+                    .catch(() => showToast("Something went wrong."));
             });
         });
 
-        function updateRatingButtons(albumId, rating) {
-            let card = document.getElementById('album-card-' + albumId);
-            if (!card) return;
-            card.querySelector('.btn-like').classList.remove('active');
-            card.querySelector('.btn-dislike').classList.remove('active');
-            if (rating === 1) card.querySelector('.btn-like').classList.add('active');
-            else if (rating === -1) card.querySelector('.btn-dislike').classList.add('active');
-        }
-
-        function showToast(message) {
-            let toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(function () { toast.classList.remove('show'); }, 2500);
+        function showToast(msg) {
+            const t = document.getElementById("toast");
+            t.textContent = msg;
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 2500);
         }
     </script>
     {% endif %}
